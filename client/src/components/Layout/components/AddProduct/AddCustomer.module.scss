@@ -1,0 +1,16 @@
+.container{
+    max-width: 1080px;
+
+    .row-form{
+        width: 100%;
+    }
+}
+
+.row-form{
+    display: flex;
+    gap: 18px;
+
+    TextField{
+        width: 100%;
+    }
+}

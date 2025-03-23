@@ -1,0 +1,28 @@
+.wrapper{
+    --default-height-info: 90px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.product-avatar{
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+}
+
+.info{
+    flex: 1;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    height: var(--default-height-info);
+}
+.type{
+    color: #767677;
+}
+.type, .product-name, .price{
+    font-size: 1.6rem;
+    font-weight: 400px;
+    line-height: 22px;
+}

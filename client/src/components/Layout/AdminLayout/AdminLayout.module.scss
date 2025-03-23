@@ -1,0 +1,30 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  width: var(--default-layout-width);
+  max-width: 100%;
+  margin-top: var(--admin-layout-header-height);
+  background-image: linear-gradient(
+    to right top,
+    #c4dfdf,
+    #c6e1e1,
+    #c9e3e2,
+    #cbe4e4,
+    #cee6e6,
+    #d1e8e8,
+    #d3eaea,
+    #d6ecec,
+    #d9eeee,
+    #dcf0f0,
+    #e0f2f2,
+    #e3f4f4
+  );
+}
+.content {
+  flex: 1;
+}

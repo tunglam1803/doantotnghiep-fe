@@ -1,0 +1,58 @@
+@import 'normalize.css';
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
+:root {
+  --primary: #609966;
+  --second-primary: 40513B;
+  --black: #000;
+  --white: #fff;
+  --text-color: #161823;
+  --default-layout-header-height: 100px;
+  --admin-layout-header-height: 58px;
+  --default-layout-width: 2462px;
+  --default-layout-horizontal-spacer: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  text-rendering: optimizeSpeed;
+}
+
+button,
+input,
+[tabindex] {
+  outline: none;
+  border: none;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+ul {
+  list-style-type: none;
+  list-style: none;
+  background-color: transparent;
+}
+
+li {
+  display: list-item;
+}
+
+button {
+  background: transparent;
+}
+/*# sourceMappingURL=GlobalStyles.css.map */

@@ -1,0 +1,247 @@
+{
+  "product": [
+    {
+        "id": 1,
+        "createAt": "2025-03-13T08:36:12.973+00:00",
+        "updatedAt": "2025-03-13T08:36:12.973+00:00",
+        "productName": "Combo",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "da",
+        "rating": null,
+        "reviewCount": null,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    },
+    {
+        "id": 2,
+        "createAt": "2025-03-13T08:46:55.961+00:00",
+        "updatedAt": "2025-03-13T08:52:05.515+00:00",
+        "productName": "yyyy",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "ooooo",
+        "rating": 4.5,
+        "reviewCount": 2,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    },
+    {
+        "id": 3,
+        "createAt": "2025-03-13T08:39:22.686+00:00",
+        "updatedAt": "2025-03-13T08:52:28.266+00:00",
+        "productName": "Combo",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "da",
+        "rating": 2.0,
+        "reviewCount": 1,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    }
+],
+  "customers": [
+    {
+      "id": 1,
+      "name": "Nguyen Van Tan",
+      "phone": "0345944242",
+      "email": "vantaan2002@gmail.com",
+      "birth": "2002-03-23",
+      "address": "Phuoc Tinh, Long Dien",
+      "city": "BR - VT",
+      "gender": "male"
+    },
+    {
+      "name": "Nguyen Van B",
+      "phone": "0345944241",
+      "email": "tanhero2002@gmail.com",
+      "birth": "2023-06-08",
+      "address": "Phuoc Tinh, Long Dien",
+      "city": "TPHCM",
+      "gender": "male",
+      "id": 2
+    }
+  ],
+  "invoices": [
+    {
+      "id": 1,
+      "empNo": "E001",
+      "status": "Pending",
+      "date": "2022-03-23",
+      "payment": "Unpaid",
+      "customer": "C001",
+      "products": [
+        {
+          "id": 1,
+          "name": "Nike Airforce 1",
+          "quantity": 2,
+          "price": 10.99
+        },
+        {
+          "id": 2,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    },
+    {
+      "id": 2,
+      "empNo": "E002",
+      "status": "Pending",
+      "date": "2023-06-14",
+      "payment": "Unpaid",
+      "customer": "C002",
+      "products": [
+        {
+          "id": 3,
+          "name": "Nike Airforce 1",
+          "quantity": 2,
+          "price": 10.99
+        },
+        {
+          "id": 4,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    },
+    {
+      "id": 3,
+      "empNo": "E003",
+      "status": "Pending",
+      "date": "2020-08-10",
+      "payment": "Unpaid",
+      "customer": "C003",
+      "items": [
+        {
+          "id": 5,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    },
+    {
+      "id": 4,
+      "empNo": "E004",
+      "status": "Pending",
+      "date": "2021-11-28",
+      "payment": "Unpaid",
+      "customer": "C004",
+      "products": [
+        {
+          "id": 6,
+          "name": "Nike Airforce 1",
+          "quantity": 2,
+          "price": 10.99
+        },
+        {
+          "id": 7,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    },
+    {
+      "id": 5,
+      "empNo": "E003",
+      "status": "Pending",
+      "date": "2022-08-10",
+      "payment": "Unpaid",
+      "customer": "C003",
+      "products": [
+        {
+          "id": 8,
+          "name": "Nike Airforce 1",
+          "quantity": 2,
+          "price": 10.99
+        },
+        {
+          "id": 1,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    },
+    {
+      "id": 6,
+      "empNo": "E003",
+      "status": "Pending",
+      "date": "2023-08-10",
+      "payment": "Unpaid",
+      "customer": "C003",
+      "products": [
+        {
+          "id": 2,
+          "name": "Nike Airforce 1",
+          "quantity": 2,
+          "price": 10.99
+        },
+        {
+          "id": 1,
+          "name": "Nike Airforce 1",
+          "quantity": 1,
+          "price": 19.99
+        }
+      ],
+      "total": 1
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Nguyen",
+      "lastName": "Tan",
+      "birthDate": "23-03-2002",
+      "gender": "Male",
+      "email": "vantaan2002@gmail.com",
+      "username": "vantaan2002",
+      "password": "123456",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "firstName": "Nguyen",
+      "lastName": "Thanh",
+      "birthDate": "23-03-2002",
+      "gender": "Male",
+      "email": "thanh@gmail.com",
+      "username": "thanh123",
+      "password": "123456",
+      "role": "user"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "product": [
+    {
+        "id": 1,
+        "createAt": "2025-03-13T08:36:12.973+00:00",
+        "updatedAt": "2025-03-13T08:36:12.973+00:00",
+        "productName": "Combo",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "da",
+        "rating": null,
+        "reviewCount": null,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    },
+    {
+        "id": 2,
+        "createAt": "2025-03-13T08:46:55.961+00:00",
+        "updatedAt": "2025-03-13T08:52:05.515+00:00",
+        "productName": "yyyy",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "ooooo",
+        "rating": 4.5,
+        "reviewCount": 2,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    },
+    {
+        "id": 3,
+        "createAt": "2025-03-13T08:39:22.686+00:00",
+        "updatedAt": "2025-03-13T08:52:28.266+00:00",
+        "productName": "Combo",
+        "describe": "xịn xanh đẹp ",
+        "category": {
+            "id": 1,
+            "createAt": "2025-03-09T10:03:19.520+00:00",
+            "updatedAt": "2025-03-09T10:03:19.520+00:00",
+            "categoryName": "Áo Thun",
+            "description": "Danh mục chứa các sản phẩm áo thun nam, nữ, trẻ em."
+        },
+        "brand": "da",
+        "rating": 2.0,
+        "reviewCount": 1,
+        "feedbacks": [],
+        "releaseDate": "2026-03-13",
+        "variants": [],
+        "images": []
+    }
+],
+  "customers": [
+    {
+      "id": 1,
+      "name": "Nguyen Van Tan",
+      "phone": "0345944241",
+      "email": "vantaan2002@gmail.com",
+      "birth": "23/03/2002",
+      "address": "BR-VT",
+      "gender": "male"
+    }
+  ]
+}
