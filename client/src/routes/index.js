@@ -16,14 +16,18 @@ import VoucherManagement from '~/pages/voucherManagement';
 import Categorymanagement from '~/pages/Categorymanagement';
 import BrandManagement from '~/pages/BrandManagement';
 import Product from '~/pages/Product';
+import Cart from '~/pages/Cart';
+import ForgotPass from '~/pages/ForgotPass';
 
 //public Routes
 const publicRoutes = [
   { path: config.routes.home, component: Home, layout: HeaderOnly },
   { path: config.routes.product, component: Product, layout: HeaderOnly },
   { path: config.routes.profile, component: Profile, layout: HeaderOnly },
+  { path: config.routes.cart, component: Cart, layout: HeaderOnly },
   { path: `${config.routes.productItem}/:id`, component: ProductItem, layout: HeaderOnly },
   { path: config.routes.login, component: Login, layout: DefaultLayout },
+  { path: config.routes.forgotpass, component: ForgotPass, layout: DefaultLayout },
   { path: config.routes.register, component: Register, layout: DefaultLayout },
   { path: config.routes.customermanagement, component: CustomerManagement, layout: AdminLayout },
   { path: config.routes.productmanagement, component: ProductManagement, layout: AdminLayout },

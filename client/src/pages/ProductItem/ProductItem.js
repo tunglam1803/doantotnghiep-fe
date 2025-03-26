@@ -10,95 +10,127 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
+import { useCart } from '../Cart/CartProvider';
 
 const cx = classNames.bind(styles);
 
 const PUBLIC_API_URL = 'http://localhost:8080';
+const MAX_VISIBLE_THUMBNAILS = 4;
 
 function ProductItem() {
   const [collapsed, setCollapsed] = useState(true);
   const [collapsed1, setCollapsed1] = useState(true);
   const [product, setProduct] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-
+  const [selectedImage, setSelectedImage] = useState('');
+  const [startIndex, setStartIndex] = useState(0);
+  const { addToCart } = useCart();
   const { id } = useParams();
 
   useEffect(() => {
-    fetchProducts();
+    fetchProduct();
   }, []);
 
-  // Khi đổi kích cỡ mà màu không còn hợp lệ -> reset màu
-  useEffect(() => {
-    if (selectedSize && !availableColors.includes(selectedColor)) {
-      setSelectedColor(null);
-    }
-  }, [selectedSize]);
+  // Fetch product details
+  const fetchProduct = () => {
+    axios
+      .get(`${PUBLIC_API_URL}/api/products/getProductById/${id}`)
+      .then((res) => {
+        setProduct(res.data);
+        if (res.data?.images?.length > 0) {
+          setSelectedImage(res.data.images[0].fileName);
+        }
+      })
+      .catch((err) => console.error('Error fetching product:', err));
+  };
 
-  // Khi đổi màu mà kích cỡ không còn hợp lệ -> reset kích cỡ
+  // Update selectedVariant when size and color are selected
+  useEffect(() => {
+    if (selectedSize && selectedColor) {
+      const variant = product?.variants.find(
+        (v) => v.size === selectedSize && v.color === selectedColor
+      );
+      setSelectedVariant(variant || null);
+    } else {
+      setSelectedVariant(null);
+    }
+  }, [selectedSize, selectedColor, product]);
+
+  // Reset size if the selected color makes the size invalid
   useEffect(() => {
     if (selectedColor && !availableSizes.includes(selectedSize)) {
       setSelectedSize(null);
     }
   }, [selectedColor]);
 
-  // Cập nhật variant khi đã chọn đủ cả kích cỡ & màu
+  // Reset color if the selected size makes the color invalid
   useEffect(() => {
-    if (selectedSize && selectedColor) {
-      const variant = product.variants.find((v) => v.size === selectedSize && v.color === selectedColor);
-      setSelectedVariant(variant || null);
-    } else {
-      setSelectedVariant(null);
+    if (selectedSize && !availableColors.includes(selectedColor)) {
+      setSelectedColor(null);
     }
-  }, [selectedSize, selectedColor]);
+  }, [selectedSize]);
 
-  const fetchProducts = () => {
-    axios
-      .get(`${PUBLIC_API_URL}/api/products/${id}`)
-      .then((res) => {
-        console.log(res);
-        setProduct(res.data);
-        if (res.data?.images?.length > 0) {
-          setSelectedImage(res.data.images[0].fileName);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
-
-  if (!product || !product.variants) {
-    return <div>Loading...</div>; // Tránh lỗi khi dữ liệu chưa sẵn sàng
+  if (!product) {
+    return <div>Loading...</div>;
   }
 
-  // Xử lý khi di chuột vào ảnh
-  const handleMouseMove = (e) => {
-    const { left, top, width, height } = e.target.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100; // Tính toán % vị trí chuột
-    const y = ((e.clientY - top) / height) * 100;
-    setMousePosition({ x, y });
-  };
-
-  // Lấy danh sách tất cả kích cỡ & màu từ variants
+  // Extract all sizes and colors from variants
   const allSizes = [...new Set(product.variants.map((variant) => variant.size))];
   const allColors = [...new Set(product.variants.map((variant) => variant.color))];
 
-  // Lọc danh sách màu dựa trên kích cỡ đã chọn
+  // Filter available sizes and colors based on the current selection
+  const availableSizes = selectedColor
+    ? product.variants.filter((variant) => variant.color === selectedColor).map((variant) => variant.size)
+    : allSizes;
+
   const availableColors = selectedSize
     ? product.variants.filter((variant) => variant.size === selectedSize).map((variant) => variant.color)
     : allColors;
 
-  // Lọc danh sách kích cỡ dựa trên màu đã chọn
-  const availableSizes = selectedColor
-    ? product.variants.filter((variant) => variant.color === selectedColor).map((variant) => variant.size)
-    : allSizes;
+  // Handle mouse movement for zoom effect
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.target.getBoundingClientRect();
+    setMousePosition({
+      x: ((e.pageX - left) / width) * 100,
+      y: ((e.pageY - top) / height) * 100,
+    });
+  };
+
+  // Handle thumbnail scrolling
+  const handleScrollUp = () => {
+    if (startIndex > 0) setStartIndex(startIndex - 1);
+  };
+
+  const handleScrollDown = () => {
+    if (startIndex + MAX_VISIBLE_THUMBNAILS < product.images.length) {
+      setStartIndex(startIndex + 1);
+    }
+  };
+
+  // Handle adding to cart
+  const handleAddToCart = () => {
+    if (!selectedVariant) {
+      alert('Vui lòng chọn kích cỡ và màu sắc hợp lệ trước khi thêm vào giỏ hàng!');
+      return;
+    }
+
+    if (quantity <= 0) {
+      alert('Vui lòng chọn số lượng lớn hơn 0!');
+      return;
+    }
+
+    addToCart(selectedVariant.id, quantity);
+  };
   return (
     <div className={cx('product-container', 'css-1wpyz1n')}>
       <div className={cx('box-content-wrapper')}>
         <div className={cx('box-content', 'image-layout')}>
+          {/* Ảnh chính */}
           <div
             className={cx('main-image-container')}
             onMouseEnter={() => setIsHovering(true)}
@@ -115,16 +147,32 @@ function ProductItem() {
             />
           </div>
 
+          {/* Danh sách thumbnail */}
           <div className={cx('thumbnail-container', 'thumbnail-right')}>
-            {product?.images?.map((image, index) => (
+            {/* Nút cuộn lên */}
+            {product.images.length > MAX_VISIBLE_THUMBNAILS && (
+              <button className={cx('scroll-btn')} onClick={handleScrollUp}>
+                <FontAwesomeIcon icon={faChevronUp} />
+              </button>
+            )}
+
+            {/* Hiển thị ảnh thu nhỏ */}
+            {product.images.slice(startIndex, startIndex + MAX_VISIBLE_THUMBNAILS).map((image, index) => (
               <img
-                key={index}
+                key={image.id}
                 src={`${PUBLIC_API_URL}${image.fileName}`}
                 alt={`Ảnh ${index}`}
                 className={cx('thumbnail')}
                 onClick={() => setSelectedImage(image.fileName)}
               />
             ))}
+
+            {/* Nút cuộn xuống */}
+            {product.images.length > MAX_VISIBLE_THUMBNAILS && (
+              <button className={cx('scroll-btn')} onClick={handleScrollDown}>
+                <FontAwesomeIcon icon={faChevronDown} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -238,7 +286,7 @@ function ProductItem() {
                           borderRadius: '50%',
                           cursor: selectedSize && !availableColors.includes(color) ? 'not-allowed' : 'pointer',
                           margin: '5px',
-                          border: selectedColor === color ? '1px solid gray' : 'none',
+                          border: selectedColor === color ? '1px solid #000' : '1px solid #999',
                         }}
                       />
                     ))}
@@ -270,7 +318,13 @@ function ProductItem() {
                 </div>
                 <div>
                   <div className={cx('mt10-sm', 'mb6-sm', 'pr16-sm', 'pr10-lg', 'u-full-width', 'css-181b4yz')}>
-                    <button className={cx('ncss-btn-primary-dark', 'btn-lg', 'add-to-cart-btn')}>Thêm vào giỏ</button>
+                    <button
+                      className={cx('ncss-btn-primary-dark', 'btn-lg', 'add-to-cart-btn')}
+                      onClick={handleAddToCart}
+                      disabled={!selectedVariant || quantity <= 0}
+                    >
+                      Thêm vào giỏ
+                    </button>
                   </div>
                 </div>
               </div>

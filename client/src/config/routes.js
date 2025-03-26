@@ -4,6 +4,7 @@ const routes = {
   profile: '/profile',
   productItem: '/productItem',
   login: '/login',
+  forgotpass: '/forgotpass',
   register: '/register',
   customermanagement: '/customermanagement',
   productmanagement: '/productmanagement',
@@ -12,6 +13,7 @@ const routes = {
   ordermanagement: '/ordermanagement',
   vouchermanagement: '/vouchermanagement',
   report: '/report',
+  cart: '/cart',
 };
 
 export default routes;

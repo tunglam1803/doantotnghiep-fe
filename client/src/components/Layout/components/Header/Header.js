@@ -1,61 +1,94 @@
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCartShopping, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
+import axios from 'axios';
 import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
-
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import config from '~/config';
 import styles from './Header.module.scss';
-// import images from '~/assets/images';
 import logo from '~/assets/images/Unet-removebg-preview.svg';
 
 const cx = classNames.bind(styles);
 
 const MENU_ITEMS = [
-  {
-    title: 'Profile',
-    to: '/profile',
-  },
-  {
-    title: 'Orders',
-    to: '/orders',
-  },
-  {
-    title: 'Favourites',
-    to: '/favourites',
-  },
-  {
-    title: 'Inbox',
-    to: '/inbox',
-  },
-  {
-    title: 'Experiences',
-    to: '/experiences',
-  },
-  {
-    title: 'Account Settings',
-    to: '/accountsetting',
-  },
-  {
-    title: 'Admin',
-    to: '/customermanagement',
-  },
-  {
-    title: 'Log Out',
-    to: '/login',
-  },
+  { title: 'Profile', to: '/profile' },
+  { title: 'Orders', to: '/orders' },
+  { title: 'Favourites', to: '/favourites' },
+  { title: 'Inbox', to: '/inbox' },
+  { title: 'Experiences', to: '/experiences' },
+  { title: 'Account Settings', to: '/accountsetting' },
+  { title: 'Admin', to: '/customermanagement' },
+  { title: 'Log Out', to: '/login' },
 ];
 
 function Header() {
   const [currentUser, setCurrentUser] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cart, setCart] = useState([]); // Lưu danh sách sản phẩm trong giỏ hàng
+  const [totalPrice, setTotalPrice] = useState(0); // Tổng giá trị giỏ hàng
+  const navigate = useNavigate(); // Khởi tạo navigate=
+
+  const handleCheckout = () => {
+    toggleCart(); // Đóng giỏ hàng
+    navigate(config.routes.cart); // Chuyển trang
+  };
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     setCurrentUser(isLoggedIn);
+    if (isLoggedIn) {
+      fetchCart(); // Gọi API khi user đăng nhập
+    }
   }, []);
+
+  const fetchCart = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('Người dùng chưa đăng nhập!');
+        return;
+      }
+
+      const response = await axios.get('http://localhost:8080/api/cart/', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setCart(response.data.items || []);
+      setTotalPrice(response.data.totalPrice || 0);
+    } catch (error) {
+      if (error.response && error.response.status === 403) {
+        console.warn('Không có quyền truy cập. Chuyển hướng đến trang đăng nhập...');
+        window.location.href = '/login'; // Chuyển hướng nếu bị 403
+      } else {
+        console.error('Lỗi khi lấy giỏ hàng:', error);
+      }
+    }
+  };
+
+  const updateQuantity = async (id, newQuantity) => {
+    if (newQuantity < 1) return; // Không cho giảm dưới 1
+
+    console.log('Updating quantity with payload:', { id, quantity: newQuantity });
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(
+        'http://localhost:8080/api/cart/updateCartItemQuantity',
+        { id, quantity: newQuantity },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      console.log('Quantity updated successfully:', response.data);
+      setCart(response.data.items);
+      setTotalPrice(response.data.totalPrice);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật số lượng:', error.response?.data || error.message);
+      alert('Không thể cập nhật số lượng. Vui lòng thử lại sau.');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -63,11 +96,15 @@ function Header() {
     setCurrentUser(false);
   };
 
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+  };
+
   return (
     <header className={cx('wrapper')}>
       <div className={cx('inner')}>
         <Link to={config.routes.home} className={cx('logo-link')}>
-          <img src={logo} alt="DaShoe" className={cx('logo')} />
+          <img src={logo} alt="UnetFashion" className={cx('logo')} />
         </Link>
 
         <ul className={cx('pre-desktop-menu')}>
@@ -80,6 +117,66 @@ function Header() {
         </ul>
 
         <div className={cx('search-place')}>
+          <div className={cx('header-cart')}>
+            <button className={cx('dropdown-toggle')} onClick={toggleCart}>
+              <FontAwesomeIcon className={cx('product-card_btn-shopping')} icon={faCartShopping} />
+            </button>
+            <span className={cx('header-cart_count')}>{cart.length}</span>
+          </div>
+
+          {isCartOpen && (
+            <div className={cx('cart-sidebar')}>
+              <div className={cx('cart-content')}>
+                <button className={cx('cart-close-btn')} onClick={toggleCart}>
+                  ×
+                </button>
+                <h2>Giỏ hàng</h2>
+                {cart.length === 0 ? (
+                  <p>Chưa có sản phẩm nào trong giỏ hàng.</p>
+                ) : (
+                  <div>
+                    {cart.map((item) => (
+                      <div key={item.productVariantId} className={cx('cart-item')}>
+                        <img
+                          src={`http://localhost:8080${item.imageUrl}`}
+                          alt={item.nameProduct}
+                          className={cx('cart-item-image')}
+                        />
+
+                        <div className={cx('cart-item-info')}>
+                          <p>{item.nameProduct}</p>
+
+                          <p>{item.price.toLocaleString()} VND</p>
+                          <div className={cx('cart-item-actions')}>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <FontAwesomeIcon icon={faMinus} />
+                            </button>
+
+                            <span>{item.quantity}</span>
+
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= item.stock}
+                            >
+                              <FontAwesomeIcon icon={faPlus} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <h3>Tổng tiền: {totalPrice.toLocaleString()} VND</h3>
+                    <button className={cx('checkout-btn')} onClick={handleCheckout}>
+                      Thanh toán ngay
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {currentUser ? (
             <Tippy
               interactive
@@ -117,164 +214,4 @@ function Header() {
   );
 }
 
-
 export default Header;
-// import * as React from 'react';
-// import AppBar from '@mui/material/AppBar';
-// import Box from '@mui/material/Box';
-// import Toolbar from '@mui/material/Toolbar';
-// import IconButton from '@mui/material/IconButton';
-// import Typography from '@mui/material/Typography';
-// import Menu from '@mui/material/Menu';
-// import MenuIcon from '@mui/icons-material/Menu';
-// import Container from '@mui/material/Container';
-// import Avatar from '@mui/material/Avatar';
-// import Button from '@mui/material/Button';
-// import Tooltip from '@mui/material/Tooltip';
-// import MenuItem from '@mui/material/MenuItem';
-// import AdbIcon from '@mui/icons-material/Adb';
-
-// const pages = ['Products', 'Pricing', 'Blog'];
-// const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-
-// function Header() {
-//   const [anchorElNav, setAnchorElNav] = React.useState(null);
-//   const [anchorElUser, setAnchorElUser] = React.useState(null);
-
-//   const handleOpenNavMenu = (event) => {
-//     setAnchorElNav(event.currentTarget);
-//   };
-//   const handleOpenUserMenu = (event) => {
-//     setAnchorElUser(event.currentTarget);
-//   };
-
-//   const handleCloseNavMenu = () => {
-//     setAnchorElNav(null);
-//   };
-
-//   const handleCloseUserMenu = () => {
-//     setAnchorElUser(null);
-//   };
-
-//   return (
-//     <AppBar position="static">
-//       <Container maxWidth="xl">
-//         <Toolbar disableGutters>
-//           <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-//           <Typography
-//             variant="h6"
-//             noWrap
-//             component="a"
-//             href="#app-bar-with-responsive-menu"
-//             sx={{
-//               mr: 2,
-//               display: { xs: 'none', md: 'flex' },
-//               fontFamily: 'monospace',
-//               fontWeight: 700,
-//               letterSpacing: '.3rem',
-//               color: 'inherit',
-//               textDecoration: 'none',
-//             }}
-//           >
-//             LOGO
-//           </Typography>
-
-//           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-//             <IconButton
-//               size="large"
-//               aria-label="account of current user"
-//               aria-controls="menu-appbar"
-//               aria-haspopup="true"
-//               onClick={handleOpenNavMenu}
-//               color="inherit"
-//             >
-//               <MenuIcon />
-//             </IconButton>
-//             <Menu
-//               id="menu-appbar"
-//               anchorEl={anchorElNav}
-//               anchorOrigin={{
-//                 vertical: 'bottom',
-//                 horizontal: 'left',
-//               }}
-//               keepMounted
-//               transformOrigin={{
-//                 vertical: 'top',
-//                 horizontal: 'left',
-//               }}
-//               open={Boolean(anchorElNav)}
-//               onClose={handleCloseNavMenu}
-//               sx={{ display: { xs: 'block', md: 'none' } }}
-//             >
-//               {pages.map((page) => (
-//                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-//                   <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
-//                 </MenuItem>
-//               ))}
-//             </Menu>
-//           </Box>
-//           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-//           <Typography
-//             variant="h5"
-//             noWrap
-//             component="a"
-//             href="#app-bar-with-responsive-menu"
-//             sx={{
-//               mr: 2,
-//               display: { xs: 'flex', md: 'none' },
-//               flexGrow: 1,
-//               fontFamily: 'monospace',
-//               fontWeight: 700,
-//               letterSpacing: '.3rem',
-//               color: 'inherit',
-//               textDecoration: 'none',
-//             }}
-//           >
-//             LOGO
-//           </Typography>
-//           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-//             {pages.map((page) => (
-//               <Button
-//                 key={page}
-//                 onClick={handleCloseNavMenu}
-//                 sx={{ my: 2, color: 'white', display: 'block' }}
-//               >
-//                 {page}
-//               </Button>
-//             ))}
-//           </Box>
-//           <Box sx={{ flexGrow: 0 }}>
-//             <Tooltip title="Open settings">
-//               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-//                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-//               </IconButton>
-//             </Tooltip>
-//             <Menu
-//               sx={{ mt: '45px' }}
-//               id="menu-appbar"
-//               anchorEl={anchorElUser}
-//               anchorOrigin={{
-//                 vertical: 'top',
-//                 horizontal: 'right',
-//               }}
-//               keepMounted
-//               transformOrigin={{
-//                 vertical: 'top',
-//                 horizontal: 'right',
-//               }}
-//               open={Boolean(anchorElUser)}
-//               onClose={handleCloseUserMenu}
-//             >
-//               {settings.map((setting) => (
-//                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-//                   <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-//                 </MenuItem>
-//               ))}
-//             </Menu>
-//           </Box>
-//         </Toolbar>
-//       </Container>
-//     </AppBar>
-//   );
-// }
-// export default Header;
