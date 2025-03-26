@@ -7,6 +7,7 @@ import styles from './Product.module.scss';
 import Sidebar from '~/components/Layout/components/Sidebar/Sidebar';
 import config from '~/config';
 import axios from 'axios';
+import { Pagination } from 'antd';
 
 const cx = classNames.bind(styles);
 const PUBLIC_API_URL = 'http://localhost:8080';
@@ -17,10 +18,18 @@ function Product() {
   const [images, setImages] = useState({});
   const [filters, setFilters] = useState({ keyword: '', size: '', color: '', minPrice: '', maxPrice: '' });
   const [selectedVariants] = useState({});
+  const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [pageSize, setPageSize] = useState(visible ? 8 : 10); // Items per page
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     fetchProducts();
-  }, [filters]);
+  }, [filters, currentPage, pageSize]);
+
+  useEffect(() => {
+    setPageSize(visible ? 8 : 10);
+    setCurrentPage(1); // Reset to the first page when pageSize changes
+  }, [visible]);
 
   const fetchProductImages = async (productId) => {
     try {
@@ -34,31 +43,74 @@ function Product() {
 
   const fetchProducts = async () => {
     try {
-      let url = `${PUBLIC_API_URL}/api/products/`;
-      const params = { ...filters };
-      if (Object.values(params).some((value) => value)) {
-        url = `${PUBLIC_API_URL}/api/products/filter`;
+      let url = `${PUBLIC_API_URL}/api/products/get-all-product`;
+      const params = { ...filters, page: currentPage - 1, size: pageSize }; // Backend expects 0-based page index
+      if (Object.values(filters).some((value) => value)) {
+        url = `${PUBLIC_API_URL}/api/products/filterProduct`;
       }
-
+  
+      console.log('Request URL:', url);
+      console.log('Request Params:', params);
+  
       const res = await axios.get(url, { params });
-      setProducts(res.data);
-
-      const imagePromises = res.data.map(async (product) => {
-        const images = await fetchProductImages(product.id);
-        return { productId: product.id, images };
-      });
-
-      const imageResults = await Promise.all(imagePromises);
-      const imageMap = {};
-      imageResults.forEach(({ productId, images }) => {
-        imageMap[productId] = images;
-      });
-
-      setImages(imageMap);
+      console.log('API Response:', res.data);
+  
+      const productList = res.data.products;
+      if (Array.isArray(productList) && productList.length > 0) {
+        setProducts(productList);
+        setTotalItems(res.data.totalElements || 0); // Update total items for pagination
+  
+        const imagePromises = productList.map(async (product) => {
+          const images = await fetchProductImages(product.id);
+          return { productId: product.id, images };
+        });
+  
+        const imageResults = await Promise.all(imagePromises);
+        const imageMap = {};
+        imageResults.forEach(({ productId, images }) => {
+          imageMap[productId] = images;
+        });
+  
+        setImages(imageMap);
+      } else {
+        console.warn('No products found:', res.data);
+        setProducts([]);
+        setTotalItems(0);
+      }
     } catch (err) {
-      console.error('Lỗi khi lấy danh sách sản phẩm:', err);
+      console.error('Lỗi khi lấy danh sách sản phẩm:', err.message);
+      setProducts([]);
+      setTotalItems(0);
     }
   };
+
+  // const fetchProducts = async () => {
+  //   try {
+  //     let url = `${PUBLIC_API_URL}/api/products/get-all-product`;
+  //     const params = { ...filters };
+  //     if (Object.values(params).some((value) => value)) {
+  //       url = `${PUBLIC_API_URL}/api/products/filterProduct`;
+  //     }
+
+  //     const res = await axios.get(url, { params });
+  //     setProducts(res.data);
+
+  //     const imagePromises = res.data.map(async (product) => {
+  //       const images = await fetchProductImages(product.id);
+  //       return { productId: product.id, images };
+  //     });
+
+  //     const imageResults = await Promise.all(imagePromises);
+  //     const imageMap = {};
+  //     imageResults.forEach(({ productId, images }) => {
+  //       imageMap[productId] = images;
+  //     });
+
+  //     setImages(imageMap);
+  //   } catch (err) {
+  //     console.error('Lỗi khi lấy danh sách sản phẩm:', err);
+  //   }
+  // };
 
   return (
     <div className={cx('experience-wrapper')}>
@@ -109,11 +161,22 @@ function Product() {
                               selectedVariant.promotionalPrice &&
                               selectedVariant.price !== selectedVariant.promotionalPrice ? (
                                 <>
-                                  {selectedVariant.promotionalPrice}₫{' '}
-                                  <span className={cx('old-price')}>{selectedVariant.price}₫</span>
+                                  {new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND',
+                                  }).format(selectedVariant.promotionalPrice)}
+                                  <span className={cx('old-price')}>
+                                    {new Intl.NumberFormat('vi-VN', {
+                                      style: 'currency',
+                                      currency: 'VND',
+                                    }).format(selectedVariant.price)}
+                                  </span>
                                 </>
                               ) : (
-                                `${selectedVariant.price}₫`
+                                `${new Intl.NumberFormat('vi-VN', {
+                                  style: 'currency',
+                                  currency: 'VND',
+                                }).format(selectedVariant.price)}`
                               )
                             ) : (
                               'Chưa có giá'
@@ -134,6 +197,19 @@ function Product() {
               )}
             </div>
           </section>
+
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalItems}
+            showSizeChanger
+            showQuickJumper
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            showTotal={(total) => `Total ${total} items`}
+          />
         </main>
       </div>
     </div>

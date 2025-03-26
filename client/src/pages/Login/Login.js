@@ -47,7 +47,7 @@ function Login() {
     if (!validateForm()) return;
   
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', {
+      const response = await axios.post('http://localhost:8080/api/users/loginUser', {
         userName: username,
         passWord: password,
       });
@@ -98,7 +98,7 @@ function Login() {
                 No account?
                 <Link to={config.routes.register}> Sign up</Link>
               </p>
-              <p className={cx('forget-password')}>Forgot your password?</p>
+              <Link to={config.routes.forgotpass} className={cx('forget-password')}> Forgot your password?</Link>
             </form>
           </div>
           <div className={cx('right-side')}>
