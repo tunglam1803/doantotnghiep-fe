@@ -1,6 +1,1 @@
-
-function Profile() {
-    return <h2>Profile Pages</h2>
-}
-
-export default Profile;
+export { default } from './Profile.js';

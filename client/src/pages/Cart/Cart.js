@@ -83,17 +83,11 @@ const Cart = () => {
                     <span className={cx('discount')}>{item.discount ? `-${item.discount.toLocaleString()}đ` : ''}</span>
                   </div>
                   <div className={cx('quantity-control')}>
-                    <button
-                      className={cx('quantity-btn')}
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    >
+                    <button className={cx('quantity-btn')} onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                       -
                     </button>
                     <span className={cx('quantity-number')}>{item.quantity}</span>
-                    <button
-                      className={cx('quantity-btn')}
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
+                    <button className={cx('quantity-btn')} onClick={() => updateQuantity(item.id, item.quantity + 1)}>
                       +
                     </button>
                   </div>
@@ -125,7 +119,9 @@ const Cart = () => {
             <span>Thành tiền:</span>
             <span>{totalAmount.toLocaleString()}đ</span>
           </div>
-          <button className={cx('checkout-button')}>ĐẶT HÀNG</button>
+          <Link to={config.routes.payment}>
+            <button className={cx('checkout-button')}>ĐẶT HÀNG</button>
+          </Link>
         </div>
       </div>
     </div>

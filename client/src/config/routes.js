@@ -14,6 +14,7 @@ const routes = {
   vouchermanagement: '/vouchermanagement',
   report: '/report',
   cart: '/cart',
+  payment: '/payment',
 };
 
 export default routes;

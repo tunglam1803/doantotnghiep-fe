@@ -60,7 +60,7 @@ export default function ChatBox() {
     <Box className={cx('chat-container')}>
       {!isOpen ? (
         <IconButton className={cx('chat-icon')} color="primary" size="large" onClick={() => setIsOpen(true)}>
-          <ChatIcon fontSize="large" /> {''} Giao tiếp tý nhỉ
+          <ChatIcon fontSize="large" /> {''} Cùng trò chuyện nào
         </IconButton>
       ) : (
         <Box className={cx('chat-box')}>

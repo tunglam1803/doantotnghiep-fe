@@ -1,79 +1,47 @@
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Sidebar.module.scss';
 
 const cx = classNames.bind(styles);
 
-function Sidebar() {
+function Sidebar({ onFilterChange }) {
   const [collapsed1, setCollapsed1] = useState(true);
   const [collapsed2, setCollapsed2] = useState(true);
   const [collapsed3, setCollapsed3] = useState(true);
-  
-  // States for filter values
+
   const [selectedPrice, setSelectedPrice] = useState([]);
   const [selectedSize, setSelectedSize] = useState([]);
   const [selectedColor, setSelectedColor] = useState([]);
-  
-  // Function to handle API call for filtering
-  const fetchFilteredData = async () => {
-    // Giả sử API nhận các tham số price, size, và color
-    const response = await fetch('/api/products', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // API query string, giả sử API hỗ trợ các tham số này
-      body: JSON.stringify({
-        price: selectedPrice,
-        size: selectedSize,
-        color: selectedColor,
-      }),
-    });
-
-    const data = await response.json();
-    console.log(data); // Xử lý dữ liệu trả về từ API
-  };
-
-  // Gọi API mỗi khi giá trị lọc thay đổi
-  useEffect(() => {
-    fetchFilteredData();
-  }, [selectedPrice, selectedSize, selectedColor]);
 
   const handlePriceChange = (price) => {
     setSelectedPrice((prev) => {
-      if (prev.includes(price)) {
-        return prev.filter((item) => item !== price);
-      } else {
-        return [...prev, price];
-      }
+      const updated = prev.includes(price) ? prev.filter((item) => item !== price) : [...prev, price];
+      onFilterChange('price', updated); // Notify parent component
+      return updated;
     });
   };
 
   const handleSizeChange = (size) => {
     setSelectedSize((prev) => {
-      if (prev.includes(size)) {
-        return prev.filter((item) => item !== size);
-      } else {
-        return [...prev, size];
-      }
+      const updated = prev.includes(size) ? prev.filter((item) => item !== size) : [...prev, size];
+      onFilterChange('size', updated); // Notify parent component
+      return updated;
     });
   };
 
   const handleColorChange = (color) => {
     setSelectedColor((prev) => {
-      if (prev.includes(color)) {
-        return prev.filter((item) => item !== color);
-      } else {
-        return [...prev, color];
-      }
+      const updated = prev.includes(color) ? prev.filter((item) => item !== color) : [...prev, color];
+      onFilterChange('color', updated); // Notify parent component
+      return updated;
     });
   };
 
   return (
     <aside className={cx('wrapper')}>
-      {/* Bộ lọc Giá */}
+      {/* Price Filter */}
       <div className={cx('Collapsible')}>
         <span className={cx('Collapsible_trigger')}>
           <div className={cx('trigger-content')}>
@@ -90,7 +58,7 @@ function Sidebar() {
         </span>
         {collapsed1 && (
           <div className={cx('filter-item_block')}>
-            {['Từ 1,000,000đ', '1,000,000đ - 2,000,000đ', '2,000,000đ - 4,000,000đ', 'Trên 4,000,000đ'].map(
+            {['Từ 100.000đ', '100.000đ - 500.000đ', '500.000đ - 1.000.000đ', 'Trên 1.000.000đ'].map(
               (price, index) => (
                 <button key={index} className={cx('filter-item')} onClick={() => handlePriceChange(price)}>
                   <input
@@ -106,7 +74,7 @@ function Sidebar() {
         )}
       </div>
 
-      {/* Bộ lọc Size */}
+      {/* Size Filter */}
       <div className={cx('Collapsible')}>
         <span className={cx('Collapsible_trigger')}>
           <div className={cx('trigger-content')}>
@@ -132,7 +100,7 @@ function Sidebar() {
         )}
       </div>
 
-      {/* Bộ lọc Màu sắc */}
+      {/* Color Filter */}
       <div className={cx('Collapsible')}>
         <span className={cx('Collapsible_trigger')}>
           <div className={cx('trigger-content')}>
