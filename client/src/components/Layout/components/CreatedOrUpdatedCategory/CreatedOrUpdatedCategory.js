@@ -4,43 +4,38 @@ import TextField from '@mui/material/TextField';
 import { DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Button from '@mui/material/Button';
 import { useEffect, useState } from 'react';
-import { Select } from 'antd';
+// import { Select } from 'antd';
 
 const cx = classNames.bind(styles);
 
 function CreatedOrUpdatedCategory(
   { handleCreatedOrUpdated, handleClose, selectedCategory, isEditing, btn, brand }
 ) {
-  const [name, setName] = useState('');
-  const [image, setImage] = useState('');
+  const [categoryName, setCategoryName] = useState('');
+  const [gender, setGender] = useState('');
   const [description, setDescription] = useState('');
-  const [brand_id, setBrandId] = useState(null);
+  const [is_deleted, setIs_deleted] = useState('');
   const data = {
     id: isEditing ? selectedCategory.id : null,
-    name,
-    image,
+    categoryName,
+    gender,
     description,
-    brand_id
+    is_deleted,
   }
   useEffect(() => {
     if (isEditing) {
-      setName(selectedCategory.name);
-      setImage(selectedCategory.image);
+      setCategoryName(selectedCategory.categoryName);
+      setGender(selectedCategory.gender);
       setDescription(selectedCategory.description);
-      setBrandId(selectedCategory.brand_id);
+      setIs_deleted(selectedCategory.is_deleted);
     }
   }, [isEditing, selectedCategory]);
-
-
-  const onChange = (value) => {
-    setBrandId(value);
-  };
 
   console.log(selectedCategory)
 
   return (
     <>
-      <DialogTitle>Thêm danh mục</DialogTitle>
+      <DialogTitle sx={{ fontSize: '2rem' }}>Thêm danh mục</DialogTitle>
       <DialogContent>
         <div className={cx('container')}>
           <div className={cx('row-form')}>
@@ -49,13 +44,19 @@ function CreatedOrUpdatedCategory(
               margin="dense"
               id="name"
               name="name"
-              value={name}
+              value={categoryName}
               placeholder="Tên danh mục"
               label="Tên danh mục"
               type="text"
               fullWidth
               variant="standard"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setCategoryName(e.target.value)}
+              InputProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
+              InputLabelProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
             />
           </div>
           <div className={cx('row-form')}>
@@ -70,6 +71,12 @@ function CreatedOrUpdatedCategory(
               fullWidth
               value={description}
               variant="standard"
+              InputProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
+              InputLabelProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
@@ -77,26 +84,21 @@ function CreatedOrUpdatedCategory(
             <TextField
               autoFocus
               margin="dense"
-              id="image"
-              name="image"
-              placeholder="Logo"
-              label="Logo"
+              id="Gioitinh"
+              name="Gioitinh"
+              placeholder="Giới tính"
+              label="Giới tính"
               type="text"
               fullWidth
-              value={image}
+              value={gender}
               variant="standard"
-              onChange={(e) => setImage(e.target.value)}
-            />
-          </div>
-          <div className={cx('row-form')}>            
-          <Select
-              showSearch
-              placeholder="Thương hiệu"
-              optionFilterProp="label"
-              onChange={onChange}
-              value={brand_id}
-              defaultValue={brand_id}
-              options={brand.map((item) => ({ label: item.name, value: item.id }))}
+              InputProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
+              InputLabelProps={{
+                style: { fontSize: '2rem' }, // Đồng bộ với DialogTitle
+              }}
+              onChange={(e) => setGender(e.target.value)}
             />
           </div>
         </div>

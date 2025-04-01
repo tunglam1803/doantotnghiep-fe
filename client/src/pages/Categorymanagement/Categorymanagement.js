@@ -7,61 +7,74 @@ import Dialog from '@mui/material/Dialog';
 import CreatedOrUpdatedCategory from '~/components/Layout/components/CreatedOrUpdatedCategory';
 import axios from 'axios';
 import { message } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
-const PUBLIC_API_URL = 'http://localhost:5252/open-api/v1/category';
-const PUBLIC_API_URL_BRAND = 'http://localhost:5252/open-api/v1/brand';
-
+const PUBLIC_API_URL = 'http://localhost:8080/api/products';
 
 function Categorymanagement() {
   const [searchValue, setSearchValue] = useState('');
-  const [brand, setBrand] = useState([]);
   const [categories, setCategories] = useState([]);
   const [btn, setBtn] = useState('Thêm');
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const inputRef = useRef();
 
   useEffect(() => {
-    fetchCategories();
-    fetchBrand();
+    if (!localStorage.getItem('token')) {
+      alert('Vui lòng đăng nhập để tiếp tục.');
+      navigate('/login');
+    } else {
+      fetchCategories();
+    }
   }, []);
 
   const fetchCategories = () => {
     axios
-      .get(`${PUBLIC_API_URL}/get-all`)
+      .get(`${PUBLIC_API_URL}/getAll`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      })
       .then((res) => {
         console.log(res);
-        setCategories(res.data.data);
+        setCategories(res.data); // Assuming the response is a list of categories
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error('Error fetching categories:', err.response?.data || err.message);
+        if (err.response?.status === 403) {
+          message.error('Bạn không có quyền truy cập vào danh mục này.');
+        } else {
+          message.error('Có lỗi xảy ra, vui lòng thử lại!');
+        }
+      });
   };
 
-  const fetchBrand = () => {
-    axios
-      .get(`${PUBLIC_API_URL_BRAND}/get-all`)
-      .then((res) => {
-        console.log(res);
-        setBrand(res.data.data);
-      })
-      .catch((err) => console.log(err));
+  const formatDate = (instant) => {
+    if (!instant) return 'N/A'; // Handle null or undefined dates
+    try {
+      return format(new Date(instant), 'dd/MM/yyyy HH:mm:ss'); // Format as "day/month/year hours:minutes:seconds"
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Value:', instant);
+      return 'Invalid date';
+    }
   };
 
   const handleDeleteCategory = (id) => {
     axios
-      .delete(`${PUBLIC_API_URL}/${id}`)
+      .delete(`${PUBLIC_API_URL}/deleteCategory/${id}`)
       .then((res) => {
         const { success } = res.data;
-          if (success) {
-            message.success('Xóa danh mục thành công!');
-          } else {
-            message.error('Có lỗi xảy ra vui lòng thử lại!');
-          }
-          handleClose();
-          fetchCategories();
+        if (success) {
+          message.success('Xóa danh mục thành công!');
+        } else {
+          message.error('Có lỗi xảy ra vui lòng thử lại!');
+        }
+        handleClose();
+        fetchCategories();
       })
       .catch((err) => console.log(err));
   };
@@ -96,32 +109,50 @@ function Categorymanagement() {
   const handleCreatedOrUpdated = (data) => {
     console.log(data);
     setIsSaving(true);
-    if (isEditing) {
-      axios.put(`${PUBLIC_API_URL}`, data).then((res) => {
-        const { success } = res.data;
-        if (success) {
-          message.success('Cập nhật danh mục thành công!');
-        } else {
-          message.error('Có lỗi xảy ra vui lòng thử lại!');
-        }
-        setBtn('Thêm');
-        handleClose();
-        fetchCategories();
-      });
+  
+    if (isEditing && selectedCategory?.id) {
+      // Gọi API cập nhật danh mục
+      axios
+        .put(`${PUBLIC_API_URL}/updateCategory/${selectedCategory.id}`, data, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+        .then((res) => {
+          const { success } = res.data;
+          if (success) {
+            message.success('Cập nhật danh mục thành công!');
+          } else {
+            message.error('Có lỗi xảy ra, vui lòng thử lại!');
+          }
+          setBtn('Sửa');
+          handleClose();
+          fetchCategories();
+        })
+        .catch((err) => {
+          console.error('Error updating category:', err.response?.data || err.message);
+          message.error('Không thể cập nhật danh mục. Vui lòng thử lại!');
+        })
+        .finally(() => setIsSaving(false));
     } else {
-      axios.post(`${PUBLIC_API_URL}`, data).then((res) => {
-        const { success } = res.data;
-        if (success) {
-          message.success('Thêm mới mục thành công!');
-        } else {
-          message.error('Có lỗi xảy ra vui lòng thử lại!');
-        }
-        handleClose();
-        fetchCategories();
-      }).catch((err) => {
-        message.error(err.response.data.message);
-      }
-      );
+      // Gọi API thêm mới danh mục
+      axios
+        .post(`${PUBLIC_API_URL}/addCategory`, data, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+        .then((res) => {
+          const { success } = res.data;
+          if (success) {
+            message.success('Thêm mới danh mục thành công!');
+          } else {
+            message.error('Có lỗi xảy ra, vui lòng thử lại!');
+          }
+          handleClose();
+          fetchCategories();
+        })
+        .catch((err) => {
+          console.error('Error adding category:', err.response?.data || err.message);
+          message.error('Không thể thêm danh mục. Vui lòng thử lại!');
+        })
+        .finally(() => setIsSaving(false));
     }
   };
 
@@ -133,13 +164,12 @@ function Categorymanagement() {
         </button>
         <Dialog open={open || isEditing} onClose={handleClose} fullWidth maxWidth="sm">
           <CreatedOrUpdatedCategory
-              handleCreatedOrUpdated={handleCreatedOrUpdated}
-              handleClose={handleClose}
-              selectedCategory={selectedCategory}
-              isEditing={isEditing}
-              btn={btn}
-              brand={brand}
-            />
+            handleCreatedOrUpdated={handleCreatedOrUpdated}
+            handleClose={handleClose}
+            selectedCategory={selectedCategory}
+            isEditing={isEditing}
+            btn={btn}
+          />
         </Dialog>
         <div className={cx('search-site')}>
           <button className={cx('search-btn')}>
@@ -163,19 +193,13 @@ function Categorymanagement() {
         <div className={cx('table')}>
           <div className={cx('table-grid')}>
             <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>ID</h5>
+              <h5 className={cx('row-title')}>STT</h5>
             </div>
             <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Tên sản phẩm</h5>
+              <h5 className={cx('row-title')}>Tên danh mục</h5>
             </div>
             <div className={cx('row-site')}>
               <h5 className={cx('row-title')}>Mô tả</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Ảnh</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Thương hiệu</h5>
             </div>
             <div className={cx('row-site')}>
               <h5 className={cx('row-title')}>Ngày tạo</h5>
@@ -184,42 +208,66 @@ function Categorymanagement() {
               <h5 className={cx('row-title')}>Ngày chỉnh sửa</h5>
             </div>
             <div className={cx('row-site')}>
+              <h5 className={cx('row-title')}>Giới tính</h5>
+            </div>
+            <div className={cx('row-site')}>
+              <h5 className={cx('row-title')}>Trạng thái</h5>
+            </div>
+            <div className={cx('row-site')}>
               <h5 className={cx('row-title')}>Hành động</h5>
             </div>
           </div>
-          {categories.map((val, key) => {
-            return (
-              <div key={key} className={cx('table-grid', 'item-grid')}>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.id}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.name}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.description}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.image}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.brand_id}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.created_date}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{val.updated_date}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <div className={cx('wrapper-icon')}>
-                    <FontAwesomeIcon className={cx('icon-action')} icon={faPencil} onClick={() => handleEditClick(val)} />
-                    <FontAwesomeIcon className={cx('icon-action')} icon={faTrash} onClick={() => handleDeleteCategory(val.id)} />
+          {categories.length > 0 ? (
+            categories
+            .filter(
+              (category) =>
+                category.categoryName.toLowerCase().includes(searchValue.toLowerCase()) ||
+                category.gender.toLowerCase().includes(searchValue.toLowerCase()),
+            )
+            .map((val, index) => {
+              return (
+                <div key={val.id} className={cx('table-grid', 'item-grid')}>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{index + 1}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{val.categoryName}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{val.description}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{formatDate(val.createAt)}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{formatDate(val.updatedAt)}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{val.gender}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <p className={cx('item-content')}>{val.is_deleted == 0 ? 'Đang bán' : 'Ngừng kinh doanh'}</p>
+                  </div>
+                  <div className={cx('item-site')}>
+                    <div className={cx('wrapper-icon')}>
+                      <FontAwesomeIcon
+                        className={cx('icon-action')}
+                        icon={faPencil}
+                        onClick={() => handleEditClick(val)}
+                      />
+                      <FontAwesomeIcon
+                        className={cx('icon-action')}
+                        icon={faTrash}
+                        onClick={() => handleDeleteCategory(val.id)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <p className={cx('no-data')}>Không có danh mục nào.</p>
+          )}
         </div>
       </div>
     </section>

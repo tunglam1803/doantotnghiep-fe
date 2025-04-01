@@ -38,7 +38,7 @@ function SidebarAdmin() {
           </Link>
         </li>
         <li className={cx('nav-items')}>
-        <Link
+          {/* <Link
             to={config.routes.brandmanagement}
             className={cx('nav-link', `${activeItem === 'inventory' ? 'active' : ''}`)}
             onClick={() => handleItemClick('inventory')}
@@ -47,8 +47,7 @@ function SidebarAdmin() {
               <FontAwesomeIcon icon={faWarehouse} />
             </div>
             <span className={cx('nav-title')}>Quản lý thương hiệu</span>
-          </Link>
-          
+          </Link> */}
         </li>
         <li className={cx('nav-items')}>
           <Link
@@ -63,7 +62,7 @@ function SidebarAdmin() {
           </Link>
         </li>
         <li className={cx('nav-items')}>
-        <Link
+          <Link
             to={config.routes.productmanagement}
             className={cx('nav-link', `${activeItem === 'product' ? 'active' : ''}`)}
             onClick={() => handleItemClick('product')}

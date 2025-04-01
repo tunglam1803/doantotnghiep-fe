@@ -357,7 +357,7 @@ button.ncss-cta-primary-dark.btn-lg {
 
 .main-image {
   width: 530px; // Điều chỉnh kích thước phù hợp
-  height: 795px;
+  height: auto;
 }
 
 // .thumbnail-container {
@@ -387,7 +387,7 @@ button.ncss-cta-primary-dark.btn-lg {
 
   .thumbnail {
     width: 100px;
-    height: 150px;
+    height: auto;
     cursor: pointer;
     margin: 10px 0 8px;
     display: block;
@@ -524,4 +524,48 @@ button.ncss-cta-primary-dark.btn-lg {
 
 .main-image.zoom {
   transform: scale(2); // Phóng to khi hover
+}
+
+.selected-star {
+  color: gold;
+  cursor: pointer;
+  font-size: 40px; /* Tăng kích thước ngôi sao */
+  transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+}
+
+.regular-star {
+  color: gray;
+  cursor: pointer; /* Tăng kích thước ngôi sao */
+  transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+}
+
+.regular-star1 {
+  color: gray;
+  cursor: pointer;
+  font-size: 40px; /* Tăng kích thước ngôi sao */
+  transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+}
+
+.selected-star:active,
+.regular-star:active {
+  transform: scale(1.1); /* Hiệu ứng khi nhấn */
+  transition: transform 0.1s ease-in-out;
+}
+
+.dialog-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dialog-content-text {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #555;
+}
+
+.text-field {
+  font-size: 16px;
 }

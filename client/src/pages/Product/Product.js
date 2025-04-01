@@ -218,9 +218,9 @@
 
 // export default Product;
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCartShopping, faSliders } from '@fortawesome/free-solid-svg-icons';
+import { faCartShopping, faMagnifyingGlass, faCircleXmark, faSliders } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Product.module.scss';
@@ -240,6 +240,8 @@ function Product() {
   const [pageSize, setPageSize] = useState(visible ? 8 : 10); // Items per page
   const [totalItems, setTotalItems] = useState(0);
   const [images, setImages] = useState({});
+  const inputRef = useRef();
+  const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -300,6 +302,20 @@ function Product() {
     setCurrentPage(1); // Reset to the first page when filters change
   };
 
+  const handleClear = () => {
+    setSearchValue('');
+    inputRef.current.focus();
+  };
+
+  const handleChange = (e) => {
+    setPageSize(10000);
+    setCurrentPage(1);
+    const searchValue = e.target.value.toLowerCase();
+    if (!searchValue.startsWith(' ')) {
+      setSearchValue(searchValue);
+    }
+  };
+
   return (
     <div className={cx('experience-wrapper')}>
       <div className={cx('sidebar')} style={{ display: visible ? 'block' : 'none' }}>
@@ -312,58 +328,69 @@ function Product() {
             <button className={cx('filters-btn')} onClick={() => setVisible(!visible)}>
               <FontAwesomeIcon icon={faSliders} />
             </button>
-            <input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm"
-              name="keyword"
-              value={filters.keyword}
-              onChange={(e) => handleFilterChange('keyword', e.target.value)}
-              className={cx('search-input')}
-            />
+            <div className={cx('search-site')}>
+              <button className={cx('search-btn')}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+              <input
+                ref={inputRef}
+                className={cx('input-search')}
+                name="text"
+                placeholder="Nhập tên sản phẩm"
+                type="search"
+                value={searchValue}
+                onChange={handleChange}
+              />
+              <button className={cx('clear')} onClick={handleClear}>
+                <FontAwesomeIcon icon={faCircleXmark} />
+              </button>
+            </div>
           </nav>
         </header>
 
         <main>
           <section>
-            <div className={cx('product-grid_items')}>
+            <div className={cx('product-grid_items', { 'product-grid_items--sub' : visible })}>
               {products.length > 0 ? (
-                products.map((product) => {
-                  const rawImagePath = images[product.id]?.[0] || ''; // Get the first image path
-                  const imageUrl = rawImagePath
-                    ? rawImagePath.startsWith('/product-photo/')
-                      ? `${PUBLIC_API_URL}${rawImagePath}`
-                      : `${PUBLIC_API_URL}/uploads/${rawImagePath}`
-                    : '/default-img.jpg'; // Fallback to default image
+                products
+                  .filter((product) => (product.productName?.toLowerCase() || '').includes(searchValue))
+                  .map((product) => {
+                    const rawImagePath = images[product.id]?.[0] || ''; // Get the first image path
+                    const imageUrl = rawImagePath
+                      ? rawImagePath.startsWith('/product-photo/')
+                        ? `${PUBLIC_API_URL}${rawImagePath}`
+                        : `${PUBLIC_API_URL}/uploads/${rawImagePath}`
+                      : '/default-img.jpg'; // Fallback to default image
 
-                  const price =
-                    product.variants?.[0]?.promotionalPrice || product.variants?.[0]?.price || 'Chưa có giá';
+                    const price =
+                      product.variants?.[0]?.promotionalPrice || product.variants?.[0]?.price || 'Chưa có giá';
 
-                  return (
-                    <div key={product.id} className={cx('product-card')}>
-                      <Link to={`${config.routes.productItem}/${product.id}`} className={cx('product-card_link')}>
-                        <img alt={product.productName} className={cx('product-card_hero-image')} src={imageUrl} />
-                      </Link>
-                      <div className={cx('product-card_info')}>
-                        <p className={cx('product-card_info-title')}>{product.productName}</p>
-                        <div className={cx('product-card_info-body-parent')}>
-                          <p className={cx('product-card_info-body')}>
-                            {typeof price === 'number'
-                              ? price.toLocaleString('vi-VN', {
-                                  style: 'currency',
-                                  currency: 'VND',
-                                })
-                              : price}
-                          </p>
-                          <Link to={`${config.routes.productItem}/${product.id}`}>
-                            <button className={cx('product-card_btn')}>
-                              <FontAwesomeIcon className={cx('product-card_btn-shopping')} icon={faCartShopping} />
-                            </button>
-                          </Link>
+                    return (
+                      <div key={product.id} className={cx('product-card', { 'product-card--sub' : visible })}>
+                        <Link to={`${config.routes.productItem}/${product.id}`} className={cx('product-card_link')}>
+                          <img alt={product.productName} className={cx('product-card_hero-image')} src={imageUrl} />
+                        </Link>
+                        <div className={cx('product-card_info')}>
+                          <p className={cx('product-card_info-title')}>{product.productName}</p>
+                          <div className={cx('product-card_info-body-parent')}>
+                            <p className={cx('product-card_info-body')}>
+                              {typeof price === 'number'
+                                ? price.toLocaleString('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND',
+                                  })
+                                : price}
+                            </p>
+                            <Link to={`${config.routes.productItem}/${product.id}`}>
+                              <button className={cx('product-card_btn')}>
+                                <FontAwesomeIcon className={cx('product-card_btn-shopping')} icon={faCartShopping} />
+                              </button>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })
               ) : (
                 <p>Không có sản phẩm nào.</p>
               )}
@@ -381,14 +408,12 @@ function Product() {
               setPageSize(size);
             }}
             showTotal={(total) => `Total ${total} items`}
-            style={
-              {
-                display: 'flex',
-                justifyContent: 'center',
-                marginTop: '20px',
-                marginBottom: '20px',
-              }
-            }
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '20px',
+              marginBottom: '20px',
+            }}
           />
         </main>
       </div>

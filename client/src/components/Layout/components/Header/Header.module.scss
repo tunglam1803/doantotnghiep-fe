@@ -26,20 +26,21 @@
 }
 
 .logo-link {
-  width: 200px;
+  width: 100px;
+  flex: 1;
   display: flex;
 }
 
 .logo {
   height: 100px;
-  width: 200px;
+  width: 100px;
   object-fit: contain;
-  flex: 1;
+  // flex: 1;
   cursor: pointer;
 }
 
 .pre-desktop-menu {
-  width: 520px;
+  flex: 4;
   height: 100%;
   display: flex;
   align-items: center;
@@ -66,7 +67,7 @@
 
 .search-place {
   display: flex;
-  width: 400px;
+  flex: 1;
   justify-content: flex-end;
   align-items: center;
 }

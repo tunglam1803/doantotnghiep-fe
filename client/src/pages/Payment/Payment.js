@@ -2,13 +2,14 @@ import styles from './Payment.module.scss';
 import classNames from 'classnames/bind';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Form, Input, Space } from 'antd';
+import { Button, Form, Input, Space, Select } from 'antd';
+import { useCart } from '../Cart/CartProvider';
 
 const cx = classNames.bind(styles);
 const BASE_URL = 'http://localhost:8080';
 
 const Payment = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const { cart, setCart } = useCart();
   const [totalAmount, setTotalAmount] = useState(0);
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState('');
@@ -22,20 +23,16 @@ const Payment = () => {
     return localStorage.getItem('token');
   };
 
-  const [cartItemId, setCartItemId] = useState(null); // Thêm trạng thái để lưu cartItemId
-
   const fetchCart = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/cart/`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      console.log('API /api/cart/ response:', response.data);
-      setCartItems(response.data.items);
+      setCart(response.data.items);
       setTotalAmount(response.data.totalPrice);
-      setCartItemId(response.data.cartId); // Lưu cartItemId từ API
     } catch (error) {
       console.error('Lỗi khi lấy giỏ hàng:', error);
-      setError(error.response?.data?.message || 'Không thể tải giỏ hàng. Vui lòng thử lại.');
+      setError('Không thể tải giỏ hàng. Vui lòng thử lại.');
     }
   };
 
@@ -44,32 +41,26 @@ const Payment = () => {
       const response = await axios.post(`${BASE_URL}/api/ship/save`, values, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      return response.data; // Trả về ID thông tin giao hàng
+      return response.data; // Trả về ID thông tin giao hàng (Long)
     } catch (error) {
       console.error('Lỗi khi lưu thông tin giao hàng:', error);
-      setError(error.response?.data?.message || 'Không thể lưu thông tin giao hàng. Vui lòng thử lại.');
+      setError('Không thể lưu thông tin giao hàng. Vui lòng thử lại.');
       throw error;
     }
   };
 
   const createOrder = async (shippingId) => {
-    if (!cartItemId) {
-      setError('Không tìm thấy giỏ hàng. Vui lòng thử lại.');
-      throw new Error('cartItemId is null');
-    }
-  
     try {
       const response = await axios.post(
         `${BASE_URL}/api/orders/createOrder`,
         {
-          cartId: cartItemId, // Sử dụng cartItemId từ trạng thái
-          shippingId: parseInt(shippingId), // Đảm bảo shippingId là số
+          shippingId,
           paymentMethod: 'VNPAY',
           shippingMethod: 'Standard',
         },
         {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
-        }
+        },
       );
       setOrderId(response.data.id); // Lưu ID đơn hàng
       return response.data.id;
@@ -94,49 +85,17 @@ const Payment = () => {
   };
 
   const handleCheckout = async (values) => {
-    if (!cartItemId) {
-      setError('Không tìm thấy giỏ hàng. Đang tải lại giỏ hàng...');
-      console.error('cartItemId is null, attempting to re-fetch cart.');
-      try {
-        const response = await axios.get(`${BASE_URL}/api/cart/`, {
-          headers: { Authorization: `Bearer ${getAuthToken()}` },
-        });
-        console.log('API /api/cart/ response:', response.data);
-        const updatedCartItemId = response.data.cartId; // Access cartItemId directly from response
-        setCartItems(response.data.items);
-        setTotalAmount(response.data.totalPrice);
-        setCartItemId(updatedCartItemId);
-        console.log('cartItemId after re-fetch:', updatedCartItemId); // Log updated cartItemId
-        if (!updatedCartItemId) {
-          setError('Không thể tìm thấy giỏ hàng sau khi tải lại. Vui lòng thử lại.');
-          return;
-        }
-      } catch (error) {
-        console.error('Lỗi khi tải lại giỏ hàng:', error);
-        setError('Không thể tải lại giỏ hàng. Vui lòng thử lại.');
-        return;
-      }
-    }
-  
     try {
       // Lưu thông tin giao hàng
       const shippingId = await saveShippingInfo(values);
-  
+
       // Tạo đơn hàng
       const createdOrderId = await createOrder(shippingId);
-  
+
       // Tạo thanh toán
       await createPayment(createdOrderId);
     } catch (error) {
-      if (error.response) {
-        // Lỗi từ API
-        console.error('Lỗi từ API:', error.response.data);
-        setError(error.response.data.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
-      } else {
-        // Lỗi khác
-        console.error('Lỗi không xác định:', error);
-        setError('Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
-      }
+      console.error('Lỗi trong quá trình thanh toán:', error);
     }
   };
 
@@ -165,6 +124,17 @@ const Payment = () => {
               <Input />
             </Form.Item>
             <Form.Item
+              name="paymentMethod"
+              label="Phương thức thanh toán"
+              rules={[{ required: true, message: 'Vui lòng chọn phương thức thanh toán!' }]}
+            >
+              <Select placeholder="Chọn phương thức thanh toán">
+                <Select.Option value="VNPAY">VNPAY</Select.Option>
+                <Select.Option value="COD">Thanh toán khi nhận hàng (COD)</Select.Option>
+                <Select.Option value="BANK_TRANSFER">Chuyển khoản ngân hàng</Select.Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
               wrapperCol={{
                 offset: 8,
                 span: 16,
@@ -185,7 +155,7 @@ const Payment = () => {
           <h3>Tóm tắt đơn hàng</h3>
           <div className={cx('summary-item')}>
             <span>Tổng sản phẩm:</span>
-            <span>{cartItems.length}</span>
+            <span>{cart.length}</span>
           </div>
           <div className={cx('summary-item')}>
             <span>Tổng tiền hàng:</span>
@@ -199,7 +169,7 @@ const Payment = () => {
             <span>Thành tiền:</span>
             <span>{totalAmount.toLocaleString()}đ</span>
           </div>
-          {error && <p className={cx('error-message')}>{typeof error === 'string' ? error : error.message}</p>}
+          {error && <p className={cx('error-message')}>{error}</p>}
         </div>
       </div>
     </div>

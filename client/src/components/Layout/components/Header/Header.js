@@ -9,7 +9,9 @@ import 'tippy.js/dist/tippy.css';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import config from '~/config';
 import styles from './Header.module.scss';
+import { message } from 'antd';
 import logo from '~/assets/images/Unet-removebg-preview.svg';
+import { useCart } from '~/pages/Cart/CartProvider';
 
 const cx = classNames.bind(styles);
 
@@ -27,9 +29,9 @@ const MENU_ITEMS = [
 function Header() {
   const [currentUser, setCurrentUser] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cart, setCart] = useState([]); // Lưu danh sách sản phẩm trong giỏ hàng
+  const { cart, setCart } = useCart(); // Lưu danh sách sản phẩm trong giỏ hàng
   const [totalPrice, setTotalPrice] = useState(0); // Tổng giá trị giỏ hàng
-  const navigate = useNavigate(); // Khởi tạo navigate=
+  const navigate = useNavigate();
 
   const handleCheckout = () => {
     toggleCart(); // Đóng giỏ hàng
@@ -48,7 +50,7 @@ function Header() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.warn('Người dùng chưa đăng nhập!');
+        message.warn('Người dùng chưa đăng nhập!');
         return;
       }
 
@@ -56,22 +58,20 @@ function Header() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setCart(response.data.items || []);
-      setTotalPrice(response.data.totalPrice || 0);
+      setCart(response.data.items || []); // Cập nhật trạng thái giỏ hàng
+      setTotalPrice(response.data.totalPrice || 0); // Cập nhật tổng giá trị
     } catch (error) {
       if (error.response && error.response.status === 403) {
-        console.warn('Không có quyền truy cập. Chuyển hướng đến trang đăng nhập...');
-        window.location.href = '/login'; // Chuyển hướng nếu bị 403
+        message.warn('Không có quyền truy cập. Chuyển hướng đến trang đăng nhập...');
+        window.location.href = '/login';
       } else {
-        console.error('Lỗi khi lấy giỏ hàng:', error);
+        message.error('Lỗi khi lấy giỏ hàng:', error);
       }
     }
   };
 
   const updateQuantity = async (id, newQuantity) => {
     if (newQuantity < 1) return; // Không cho giảm dưới 1
-
-    console.log('Updating quantity with payload:', { id, quantity: newQuantity });
 
     try {
       const token = localStorage.getItem('token');
@@ -81,9 +81,8 @@ function Header() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      console.log('Quantity updated successfully:', response.data);
-      setCart(response.data.items);
-      setTotalPrice(response.data.totalPrice);
+      setCart(response.data.items); // Cập nhật trạng thái giỏ hàng
+      setTotalPrice(response.data.totalPrice); // Cập nhật tổng giá trị
     } catch (error) {
       console.error('Lỗi khi cập nhật số lượng:', error.response?.data || error.message);
       alert('Không thể cập nhật số lượng. Vui lòng thử lại sau.');
@@ -100,6 +99,10 @@ function Header() {
     setIsCartOpen(!isCartOpen);
   };
 
+  useEffect(() => {
+    console.log('Giỏ hàng trong Header đã được cập nhật:', cart);
+  }, [cart]);
+
   return (
     <header className={cx('wrapper')}>
       <div className={cx('inner')}>
@@ -109,10 +112,13 @@ function Header() {
 
         <ul className={cx('pre-desktop-menu')}>
           <Link to={config.routes.home} className={cx('pre-desktop-menu-item')}>
-            <button className={cx('dropdown-toggle')}>HOME</button>
+            <button className={cx('dropdown-toggle')}>Trang chủ</button>
           </Link>
           <Link to={config.routes.product} className={cx('pre-desktop-menu-item')}>
-            <button className={cx('dropdown-toggle')}>PRODUCTS</button>
+            <button className={cx('dropdown-toggle')}>Sản phẩm</button>
+          </Link>
+          <Link to={config.routes.productItem} className={cx('pre-desktop-menu-item')}>
+            <button className={cx('dropdown-toggle')}>Danh mục</button>
           </Link>
         </ul>
 
@@ -136,7 +142,7 @@ function Header() {
                 ) : (
                   <div>
                     {cart.map((item) => (
-                      <div key={item.productVariantId} className={cx('cart-item')}>
+                      <div key={item.id} className={cx('cart-item')}>
                         <img
                           src={`http://localhost:8080${item.imageUrl}`}
                           alt={item.nameProduct}
@@ -169,7 +175,7 @@ function Header() {
                     ))}
                     <h3>Tổng tiền: {totalPrice.toLocaleString()} VND</h3>
                     <button className={cx('checkout-btn')} onClick={handleCheckout}>
-                      Thanh toán ngay
+                      Xem giỏ hàng
                     </button>
                   </div>
                 )}

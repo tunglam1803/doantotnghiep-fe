@@ -22,6 +22,7 @@
     "aos": "^2.3.4",
     "axios": "^1.4.0",
     "classnames": "^2.3.2",
+    "date-fns": "^2.30.0",
     "dayjs": "^1.11.8",
     "font-awesome": "^4.7.0",
     "framer-motion": "^12.5.0",

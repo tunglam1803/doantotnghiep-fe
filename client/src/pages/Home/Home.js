@@ -1,10 +1,7 @@
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames/bind';
-// import { useEffect, useRef, useState } from 'react';
 import styles from './Home.module.scss';
-// import images from '~/assets/images';\
-import Chatbot from '~/components/Layout/components/Chatbot';
 
 const cx = classNames.bind(styles);
 
@@ -54,7 +51,6 @@ function Home() {
           </button>
         </div>
       </div>
-      <Chatbot/>
     </section>
   );
 }
