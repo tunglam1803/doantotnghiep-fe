@@ -16,6 +16,7 @@
   font-size: 1.8rem;
   width: 169px;
   background: var(--primary);
+  color: white;
   border-radius: 24px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   margin-left: 40px;
@@ -72,9 +73,6 @@
   background-color: white;
 }
 
-.input-search {
-}
-
 .clear {
   font-size: 1.8rem;
   padding: 8px;
@@ -120,14 +118,22 @@
 
 .table-grid {
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
 .row-site {
   display: flex;
   justify-content: center;
   padding: 1.25rem;
-  background-color: #aac8a7;
+  background-color: var(--primary);
+  color: white;
+}
+
+.product-image {
+  width: 50px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .row-title {

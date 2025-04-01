@@ -14,3 +14,12 @@
         width: 600px;
     }
 }
+
+.custom-textfield {
+    .MuiInputBase-input {
+      font-size: 2rem; // Kích thước chữ của input
+    }
+    .MuiInputLabel-root {
+      font-size: 2rem; // Kích thước chữ của label
+    }
+  }

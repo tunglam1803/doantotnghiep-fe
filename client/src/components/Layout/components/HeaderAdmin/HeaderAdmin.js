@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './HeaderAdmin.module.scss';
-import logo from '~/assets/images/logo.png';
+import logo from '~/assets/images/Unet-removebg-preview.svg';
 
 import { Link } from 'react-router-dom';
 import config from '~/config';

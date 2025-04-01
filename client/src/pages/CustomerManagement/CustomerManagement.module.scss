@@ -119,14 +119,14 @@
 
 .table-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
 }
 
 .row-site {
   display: flex;
   justify-content: center;
   padding: 1.25rem;
-  background-color: #aac8a7;
+  background-color: var(--primary);
 }
 
 .row-title {
@@ -134,6 +134,7 @@
   font-size: 1.6rem;
   font-weight: 500;
   line-height: 1.5rem;
+  color: white;
 }
 
 .size-grid {

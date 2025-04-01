@@ -52,15 +52,40 @@ function Login() {
         passWord: password,
       });
   
-      const token = response.data;
+      const { token, role } = response.data; // Extract token and role from the response
       localStorage.setItem('token', token);
-      localStorage.setItem('isLoggedIn', 'true'); // Lưu trạng thái đăng nhập
+      localStorage.setItem('isLoggedIn', 'true'); // Save login state
+      localStorage.setItem('role', role); // Save the user's role
   
-      navigate(config.routes.home);
+      if (role === 'ADMIN') {
+        navigate(config.routes.customermanagement); // Redirect to admin page
+      } else {
+        navigate(config.routes.home); // Redirect to home page
+      }
     } catch (error) {
       setApiError('Invalid username or password');
     }
-  };  
+  };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!validateForm()) return;
+  
+  //   try {
+  //     const response = await axios.post('http://localhost:8080/api/users/loginUser', {
+  //       userName: username,
+  //       passWord: password,
+  //     });
+  
+  //     const token = response.data;
+  //     localStorage.setItem('token', token);
+  //     localStorage.setItem('isLoggedIn', 'true'); // Lưu trạng thái đăng nhập
+  
+  //     navigate(config.routes.home);
+  //   } catch (error) {
+  //     setApiError('Invalid username or password');
+  //   }
+  // };  
 
   return (
     <div className={cx('wrapper')}>

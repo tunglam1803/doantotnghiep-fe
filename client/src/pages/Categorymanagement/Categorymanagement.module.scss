@@ -17,6 +17,7 @@
     width: 169px;
     background: var(--primary);
     border-radius: 24px;
+    color: white;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     margin-left: 40px;
   
@@ -46,9 +47,6 @@
     padding: 8px;
     cursor: pointer;
     background-color: white;
-  }
-  
-  .input-search {
   }
   
   .clear {
@@ -103,7 +101,7 @@
     display: flex;
     justify-content: center;
     padding: 1.25rem;
-    background-color: #aac8a7;
+    background-color: var(--primary);
   }
   
   .row-title {
@@ -111,6 +109,7 @@
     font-size: 1.6rem;
     font-weight: 500;
     line-height: 1.5rem;
+    color: white;
   }
   
   .item-site {
@@ -139,7 +138,8 @@
     &:hover {
       cursor: pointer;
       border-radius: 99px;
-      background-color: #aac8a7;
+      background-color: var(--primary);
+      color: white;
     }
   }
   

@@ -41,7 +41,7 @@ function Register() {
     }
   
     try {
-      const response = await axios.post('http://localhost:8080/api/users/register', formData);
+      const response = await axios.post('http://localhost:8080/api/users/registerUser', formData);
       
       if (response.status === 200) {
         alert('Đăng ký thành công!');
@@ -117,11 +117,11 @@ function Register() {
 
               <div className={cx('split1-content')}>
                 <FormControl>
-                  <FormLabel>Gender</FormLabel>
+                  <FormLabel>Giới tính</FormLabel>
                   <RadioGroup row name="gender" value={formData.gender} onChange={handleChange} className={cx('radio-group')}>
-                    <FormControlLabel value="NAM" control={<Radio />} label="Male" />
-                    <FormControlLabel value="NU" control={<Radio />} label="Female" />
-                    <FormControlLabel value="KHAC" control={<Radio />} label="Other" />
+                    <FormControlLabel value="NAM" control={<Radio />} label="Nam" />
+                    <FormControlLabel value="NỮ" control={<Radio />} label="Nữ" />
+                    <FormControlLabel value="KHÁC" control={<Radio />} label="Khác" />
                   </RadioGroup>
                 </FormControl>
               </div>

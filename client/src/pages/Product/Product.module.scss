@@ -54,6 +54,36 @@
   right: 0;
 }
 
+.search-site {
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  max-width: 250px;
+  color: #242424;
+  min-height: 40px;
+  border-radius: 4px;
+  line-height: 1.15;
+  border: 1px solid #ddd;
+  margin-left: auto;
+  margin-right: 12px;
+  // margin-right: 40px;
+}
+
+.search-btn {
+  font-size: 1.8rem;
+  padding: 8px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.clear {
+  font-size: 1.8rem;
+  padding: 8px;
+  cursor: pointer;
+  background-color: white;
+}
+
 .old-price {
   text-decoration: line-through;
   color: #9a9a9a;
@@ -103,7 +133,14 @@
 .product-grid_items {
   width: 100%;
   display: flex;
-  justify-content: first baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.product-grid_items--sub {
+  width: 100%;
+  display: flex;
+  justify-content: start;
   flex-wrap: wrap;
 }
 
@@ -111,10 +148,24 @@
   background: #fff;
   width: 245px;
   border-radius: 3px;
-  margin: 10px 3px 10px;
+  margin: 10px 8px 10px;
   transition: 0.3s ease;
   padding: 5px;
-  margin: 0 16px 0;
+  cursor: pointer;
+
+  &:hover {
+    transform: translate(-3px, -3px);
+    background: #f9f9f9;
+  }
+}
+
+.product-card--sub {
+  background: #fff;
+  width: 245px;
+  border-radius: 3px;
+  margin: 10px 2px 10px;
+  transition: 0.3s ease;
+  padding: 5px;
   cursor: pointer;
 
   &:hover {
