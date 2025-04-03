@@ -1,0 +1,91 @@
+.input-field {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px auto;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.add-button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background-color: #52c41a;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.shipping-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.shipping-table th,
+.shipping-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.shipping-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.shipping-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.shipping-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.delete-button {
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.update-button {
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.default-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.default-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.default-row {
+  background-color: #f0f8ff; // Màu nền nhạt để làm nổi bật
+}
+
+.default-label {
+  color: #4caf50; // Màu xanh lá cây
+  font-weight: bold;
+}

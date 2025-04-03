@@ -1,8 +1,8 @@
-import styles from './Payment.module.scss';
+import styles from './Order.module.scss';
 import classNames from 'classnames/bind';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Form, Input, Space, Select } from 'antd';
+import { Button, Form, Input, Space, Select, message, Modal } from 'antd';
 import { useCart } from '../Cart/CartProvider';
 import { Link } from 'react-router-dom';
 import config from '~/config';
@@ -10,21 +10,40 @@ import config from '~/config';
 const cx = classNames.bind(styles);
 const BASE_URL = 'http://localhost:8080';
 
-const Payment = () => {
+const Order = () => {
   const { cart, setCart } = useCart();
   const [totalAmount, setTotalAmount] = useState(0);
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState('');
   const [form] = Form.useForm();
-  const [shippingAddress, setShippingAddress] = useState(null); // Lưu thông tin địa chỉ giao hàng
+  const [shippingId, setShippingId] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [shippingAddress, setShippingAddress] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchCart();
-    fetchShippingAddress(); // Gọi hàm lấy địa chỉ giao hàng khi component mount
+    fetchShippingAddress();
   }, []);
 
   const getAuthToken = () => {
     return localStorage.getItem('token');
+  };
+
+  const sendBillToEmail = async () => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/orders/createBill/${orderId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+        },
+      );
+      message.success('Hóa đơn đã được gửi về email của bạn!');
+    } catch (error) {
+      console.error('Lỗi khi gửi hóa đơn:', error);
+      message.error('Không thể gửi hóa đơn. Vui lòng thử lại.');
+    }
   };
 
   const fetchCart = async () => {
@@ -32,7 +51,17 @@ const Payment = () => {
       const response = await axios.get(`${BASE_URL}/api/cart/`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      setCart(response.data.items);
+
+      console.log('Cart data:', response.data); // Log dữ liệu giỏ hàng
+
+      if (!response.data || !response.data.id) {
+        message.error('Không tìm thấy giỏ hàng. Vui lòng thử lại.');
+        setCart([]);
+        setTotalAmount(0);
+        return;
+      }
+
+      setCart(response.data); // Lưu toàn bộ dữ liệu giỏ hàng
       setTotalAmount(response.data.totalPrice);
     } catch (error) {
       console.error('Lỗi khi lấy giỏ hàng:', error);
@@ -45,46 +74,42 @@ const Payment = () => {
       const response = await axios.get(`${BASE_URL}/api/ship/default`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
-      setShippingAddress(response.data); // Lưu thông tin địa chỉ giao hàng
+      if (!response.data || !response.data.id) {
+        message.error('Không tìm thấy địa chỉ mặc định. Vui lòng chọn địa chỉ giao hàng.');
+        setShippingAddress(null);
+        return;
+      }
+      setShippingAddress(response.data);
+      setShippingId(response.data.id); // Lưu ID địa chỉ giao hàng
       form.setFieldsValue({
         fullName: response.data.fullName,
         phone: response.data.phone,
         address: response.data.address,
-      }); // Đổ dữ liệu vào form
+      });
     } catch (error) {
       console.error('Lỗi khi lấy địa chỉ giao hàng:', error);
-      setShippingAddress(null); // Nếu không có địa chỉ, đặt giá trị null
+      setShippingAddress(null);
     }
   };
 
-  const saveShippingInfo = async (values) => {
-    try {
-      const response = await axios.post(`${BASE_URL}/api/ship/save`, values, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
-      return response.data; // Trả về ID thông tin giao hàng (Long)
-    } catch (error) {
-      console.error('Lỗi khi lưu thông tin giao hàng:', error);
-      setError('Không thể lưu thông tin giao hàng. Vui lòng thử lại.');
-      throw error;
-    }
-  };
-
-  const createOrder = async (shippingId) => {
+  const createOrder = async (paymentMethod, shippingMethod) => {
     try {
       const response = await axios.post(
         `${BASE_URL}/api/orders/createOrder`,
         {
+          cartId: cart.id,
           shippingId,
-          paymentMethod: 'VNPAY',
-          shippingMethod: 'Standard',
+          paymentMethod,
+          shippingMethod,
+          shippingFee,
         },
         {
           headers: { Authorization: `Bearer ${getAuthToken()}` },
         },
       );
-      setOrderId(response.data.id); // Lưu ID đơn hàng
-      return response.data.id;
+      setOrderId(response.data.id);
+      message.success('Đơn hàng đã được tạo thành công!');
+      return response.data.id; // Trả về orderId
     } catch (error) {
       console.error('Lỗi khi tạo đơn hàng:', error);
       setError('Không thể tạo đơn hàng. Vui lòng thử lại.');
@@ -92,37 +117,44 @@ const Payment = () => {
     }
   };
 
-  const createPayment = async (orderId) => {
-    try {
-      const response = await axios.get(`${BASE_URL}/api/payment/create_payment`, {
-        params: { orderId },
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-      });
-      window.location.href = response.data; // Chuyển hướng đến URL thanh toán
-    } catch (error) {
-      console.error('Lỗi khi tạo thanh toán:', error);
-      setError('Không thể tạo thanh toán. Vui lòng thử lại.');
-    }
-  };
-
   const handleCheckout = async (values) => {
     try {
-      // Lưu thông tin giao hàng
-      const shippingId = await saveShippingInfo(values);
+      if (!cart.id) {
+        message.error('Giỏ hàng không hợp lệ. Vui lòng thử lại.');
+        return;
+      }
+
+      if (!shippingAddress || !shippingAddress.id) {
+        message.error('Không có địa chỉ mặc định. Vui lòng chọn địa chỉ giao hàng.');
+        return;
+      }
 
       // Tạo đơn hàng
-      const createdOrderId = await createOrder(shippingId);
+      const createdOrderId = await createOrder(values.paymentMethod, values.shippingMethod);
 
-      // Tạo thanh toán
-      await createPayment(createdOrderId);
+      // Nếu phương thức thanh toán là VNPAY, gọi API /create_payment
+      if (values.paymentMethod === 'VNPAY') {
+        const response = await axios.get(`${BASE_URL}/api/payment/create_payment`, {
+          params: { orderId: createdOrderId },
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+        });
+
+        // Chuyển hướng người dùng đến trang thanh toán của VNPAY
+        window.location.href = response.data;
+      } else {
+        // Hiển thị dialog khi tạo đơn hàng thành công
+        setOrderId(createdOrderId);
+        setIsModalVisible(true);
+      }
     } catch (error) {
-      console.error('Lỗi trong quá trình thanh toán:', error);
+      console.error('Lỗi trong quá trình tạo đơn hàng:', error);
+      message.error('Không thể tạo đơn hàng. Vui lòng thử lại.');
     }
   };
 
   return (
     <div className={cx('cart-page')}>
-      <h2>Thanh toán</h2>
+      <h2>Xác nhận đơn đặt hàng</h2>
       <div className={cx('cart-content')}>
         <div className={cx('cart-items-container')}>
           <Form
@@ -133,6 +165,23 @@ const Payment = () => {
             form={form}
             name="control-hooks"
             onFinish={handleCheckout}
+            onValuesChange={(changedValues) => {
+              if (changedValues.shippingMethod) {
+                switch (changedValues.shippingMethod) {
+                  case 'STANDARD':
+                    setShippingFee(15000); // Giao hàng tiết kiệm
+                    break;
+                  case 'EXPRESS':
+                    setShippingFee(30000); // Giao hàng nhanh
+                    break;
+                  case 'SAME_DAY':
+                    setShippingFee(50000); // Giao hàng hỏa tốc
+                    break;
+                  default:
+                    setShippingFee(0);
+                }
+              }
+            }}
             style={{ maxWidth: 600 }}
           >
             <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
@@ -152,7 +201,7 @@ const Payment = () => {
               <Select placeholder="Chọn phương thức thanh toán">
                 <Select.Option value="VNPAY">VNPAY</Select.Option>
                 <Select.Option value="COD">Thanh toán khi nhận hàng (COD)</Select.Option>
-                <Select.Option value="BANK_TRANSFER">Chuyển khoản ngân hàng</Select.Option>
+                {/* <Select.Option value="BANK_TRANSFER">Chuyển khoản ngân hàng</Select.Option> */}
               </Select>
             </Form.Item>
             <Form.Item
@@ -180,9 +229,7 @@ const Payment = () => {
                   Nhập lại
                 </Button>
                 <Link to={config.routes.shipping}>
-                  <Button htmlType="button">
-                    Chọn địa chỉ giao hàng khác
-                  </Button>
+                  <Button htmlType="button">Chọn địa chỉ giao hàng khác</Button>
                 </Link>
               </Space>
             </Form.Item>
@@ -200,17 +247,33 @@ const Payment = () => {
           </div>
           <div className={cx('summary-item')}>
             <span>Phí vận chuyển:</span>
-            <span>0đ</span>
+            <span>{shippingFee.toLocaleString()}đ</span>
           </div>
           <div className={cx('summary-item')}>
             <span>Thành tiền:</span>
-            <span>{totalAmount.toLocaleString()}đ</span>
+            <span>{(totalAmount + shippingFee).toLocaleString()}đ</span>
           </div>
           {error && <p className={cx('error-message')}>{error}</p>}
         </div>
       </div>
+
+      {/* Dialog thông báo */}
+      <Modal
+        title="Tạo đơn hàng thành công"
+        deprecated ={isModalVisible}
+        onOk={() => {
+          sendBillToEmail();
+          setIsModalVisible(false);
+        }}
+        onCancel={() => setIsModalVisible(false)}
+        okText="Gửi hóa đơn qua email"
+        cancelText="Đóng"
+      >
+        <p>Đơn hàng của bạn đã được tạo thành công!</p>
+        <p>Bạn có muốn gửi hóa đơn về email không?</p>
+      </Modal>
     </div>
   );
 };
 
-export default Payment;
+export default Order;

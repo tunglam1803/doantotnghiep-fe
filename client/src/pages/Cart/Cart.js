@@ -30,7 +30,7 @@ const Cart = () => {
       });
       setCart(response.data.items);
     } catch (error) {
-      message.error('Lỗi khi lấy giỏ hàng:', error);
+      console.error('Lỗi khi lấy giỏ hàng:', error);
     }
   };
 
@@ -123,7 +123,7 @@ const Cart = () => {
             <span>Thành tiền:</span>
             <span>{totalAmount.toLocaleString()}đ</span>
           </div>
-          <Link to={config.routes.payment}>
+          <Link to={config.routes.order}>
             <button className={cx('checkout-button')}>ĐẶT HÀNG</button>
           </Link>
         </div>

@@ -15,6 +15,8 @@ const routes = {
   report: '/report',
   cart: '/cart',
   payment: '/payment',
+  order: '/order',
+  shipping: '/shipping',
 };
 
 export default routes;

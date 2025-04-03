@@ -273,3 +273,233 @@
     cursor: pointer;
   }
 }
+
+.sidebar {
+  position: relative;
+  top: 0; /* Khoảng cách từ đầu trang (tùy chỉnh theo header) */
+  left: 0;
+  width: 400px; /* Chiều rộng của Sidebar */
+  height: 500px; /* Chiều cao tối đa của Sidebar */
+  background-color: #fff;
+  overflow-y: auto; /* Cho phép cuộn nội dung nếu vượt quá chiều cao */
+  overflow-x: hidden;
+  margin-right: 20px;
+  margin-left: 15px;
+  // border-right: 1px solid #ddd;
+  padding: 16px; /* Thêm padding để nội dung không sát mép */
+  // z-index: 1000;
+
+  &.hidden {
+    transform: translateX(-100%); /* Ẩn sidebar */
+  }
+
+  &.visible {
+    transform: translateX(0); /* Hiển thị sidebar */
+  }
+}
+
+.Collapsible {
+  margin-bottom: 16px; /* Thêm khoảng cách giữa các nhóm bộ lọc */
+}
+
+.Collapsible_trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+  padding: 8px 0; /* Thêm khoảng cách trên dưới */
+  border-bottom: 1px solid #ddd; /* Đường kẻ dưới mỗi tiêu đề */
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.trigger-content_label {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.trigger-content_icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.filter-item_block {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-item_block1 {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: #333;
+
+  &:hover {
+    color: #007bff;
+  }
+}
+
+.pseudo-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  background-color: white;
+  cursor: pointer;
+
+  &:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+}
+
+.filter-item_item-label {
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.filter-item-size {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1.4rem;
+  color: #333;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.filter-item-colour {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: #333;
+
+  &:hover {
+    color: #007bff;
+  }
+}
+
+.filter-item_color-patch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+
+  &.is--black {
+    background-color: black;
+  }
+
+  &.is--blue {
+    background-color: blue;
+  }
+
+  &.is--brown {
+    background-color: brown;
+  }
+
+  &.is--green {
+    background-color: green;
+  }
+
+  &.is--grey {
+    background-color: grey;
+  }
+
+  &.is--multi-colour {
+    background: linear-gradient(45deg, red, yellow, green, blue);
+  }
+
+  &.is--orange {
+    background-color: orange;
+  }
+
+  &.is--pink {
+    background-color: pink;
+  }
+
+  &.is--purple {
+    background-color: purple;
+  }
+
+  &.is--red {
+    background-color: red;
+  }
+
+  &.is--white {
+    background-color: white;
+    border: 1px solid #ccc;
+  }
+
+  &.is--yellow {
+    background-color: yellow;
+  }
+}
+
+.filter-actions {
+  margin-top: 20px;
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+}
+
+.filter-item-size.selected {
+  background-color: #333; /* Màu nền khi được chọn */
+  // border: 1px solid #000; /* Đường viền khi được chọn */
+}
+
+.filter-item-colour.selected {
+  border-radius: 10px;
+  background-color: #ccc; /* Màu nền khi được chọn */
+  // border: 1px solid #000; /* Đường viền khi được chọn */
+}
+
+.filter-item-size.selected .filter-item_item-label{
+  color: #fff; /* Màu chữ khi được chọn */
+}
+
+.filter-item-size.selected:hover,
+.filter-item-colour.selected:hover {
+  background-color: #333; /* Màu nền khi hover */
+  border-color: #ccc; /* Đường viền khi hover */
+}
+
+.filter-clear-btn {
+  width: 100px;
+  height: 40px;
+  color: #fff;
+  background-color: #333;
+  border: 1px solid #999;
+  border-top-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  cursor: pointer;
+  margin-right: 10px;
+}
