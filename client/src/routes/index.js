@@ -19,6 +19,8 @@ import Product from '~/pages/Product';
 import Cart from '~/pages/Cart';
 import ForgotPass from '~/pages/ForgotPass';
 import Payment from '~/pages/Payment';
+import Order from '~/pages/Order';
+import Shipping from '~/pages/Shipping';
 
 //public Routes
 const publicRoutes = [
@@ -27,6 +29,8 @@ const publicRoutes = [
   { path: config.routes.profile, component: Profile, layout: HeaderOnly },
   { path: config.routes.cart, component: Cart, layout: HeaderOnly },
   { path: config.routes.payment, component: Payment, layout: HeaderOnly },
+  { path: config.routes.order, component: Order, layout: HeaderOnly },
+  { path: config.routes.shipping, component: Shipping, layout: HeaderOnly },
   { path: `${config.routes.productItem}/:id`, component: ProductItem, layout: HeaderOnly },
   { path: config.routes.login, component: Login, layout: DefaultLayout },
   { path: config.routes.forgotpass, component: ForgotPass, layout: DefaultLayout },

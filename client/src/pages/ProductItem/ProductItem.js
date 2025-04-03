@@ -15,12 +15,25 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { color } from 'framer-motion';
+import { styled } from '@mui/material/styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const cx = classNames.bind(styles);
 
 const PUBLIC_API_URL = 'http://localhost:8080';
 const MAX_VISIBLE_THUMBNAILS = 4;
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 function ProductItem() {
   const [collapsed, setCollapsed] = useState(true);
@@ -35,11 +48,14 @@ function ProductItem() {
   const [selectedImage, setSelectedImage] = useState('');
   const [startIndex, setStartIndex] = useState(0);
   const { addToCart } = useCart();
+  const {cart, setCart} = useCart();
+  const [totalPrice, setTotalPrice] = useState(0);
   const { id } = useParams();
   const [open, setOpen] = React.useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
   const [feedbackText, setFeedbackText] = useState('');
   const [rating, setRating] = useState(0);
+  const [mediaUrls, setMediaUrls] = useState([]); // Khởi tạo mediaUrls là mảng rỗng
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -79,6 +95,28 @@ function ProductItem() {
       .catch((err) => console.error('Error fetching product:', err));
   };
 
+  const fetchCart = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        message.warn('Người dùng chưa đăng nhập!');
+        return;
+      }
+  
+      const response = await axios.get(`${PUBLIC_API_URL}/api/cart/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      console.log('Cart Response:', response.data);
+  
+      setCart(response.data.items || []); // Update cart state
+      setTotalPrice(response.data.totalPrice || 0); // Update total price
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      message.error('Không thể tải giỏ hàng. Vui lòng thử lại sau.');
+    }
+  };
+
   // Update selectedVariant when size and color are selected
   useEffect(() => {
     if (selectedSize && selectedColor) {
@@ -107,28 +145,85 @@ function ProductItem() {
     return <div>Loading...</div>;
   }
 
-  const handleSubmitFeedback = (event) => {
-    event.preventDefault();
-    const feedbackData = {
-      productId: product.id, // ID sản phẩm
-      feedbackText, // Nội dung đánh giá
-      rating, // Số sao đánh giá
-    };
+  const handleFileChange = (event) => {
+    const files = event.target.files;
+    const previewUrls = [];
 
-    axios
-      .post(`${PUBLIC_API_URL}/api/feedback/add`, feedbackData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Lấy token từ localStorage hoặc nơi bạn lưu trữ
-        },
-      })
-      .then((res) => {
-        setFeedbacks((prev) => [...prev, res.data]); // Cập nhật danh sách feedback
-        setFeedbackText(''); // Reset form
-        setRating(0);
-        handleClose(); // Đóng dialog
-      })
-      .catch((err) => console.error('Error submitting feedback:', err));
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const previewUrl = URL.createObjectURL(file); // Tạo URL tạm thời cho ảnh
+      previewUrls.push(previewUrl);
+    }
+
+    setMediaUrls(previewUrls); // Cập nhật danh sách URL xem trước
   };
+
+  const handleSubmitFeedback = async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData();
+
+    // Thêm các thông tin đánh giá khác vào formData
+    formData.append('productId', product.id); // ID sản phẩm
+    formData.append('feedbackText', feedbackText); // Nội dung đánh giá
+    formData.append('rating', rating); // Số sao đánh giá
+
+    // Thêm file vào formData
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput?.files) {
+      for (let i = 0; i < fileInput.files.length; i++) {
+        formData.append('files', fileInput.files[i]);
+      }
+    }
+
+    try {
+      // Gửi yêu cầu đến API /api/feedback/add
+      const response = await axios.post(`${PUBLIC_API_URL}/api/feedback/add`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm token nếu cần
+        },
+      });
+
+      // Cập nhật danh sách feedback sau khi gửi thành công
+      setFeedbacks((prev) => [...prev, response.data]);
+      setFeedbackText(''); // Reset form
+      setRating(0); // Reset đánh giá
+      setMediaUrls([]); // Reset danh sách URL ảnh
+      message.success('Đánh giá của bạn đã được gửi thành công!');
+      setOpen(false); // Đóng dialog
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      message.error('Gửi đánh giá thất bại!');
+    }
+  };
+
+  // const handleFileUpload = async (event) => {
+  //   const files = event.target.files;
+  //   const formData = new FormData();
+
+  //   // Thêm từng file vào formData
+  //   for (let i = 0; i < files.length; i++) {
+  //     formData.append('files', files[i]);
+  //   }
+
+  //   try {
+  //     // Gửi yêu cầu tải file lên server
+  //     const response = await axios.post(`${PUBLIC_API_URL}/api/feedback/upload`, formData, {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //         Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm token nếu cần
+  //       },
+  //     });
+
+  //     // Cập nhật danh sách URL ảnh sau khi tải lên thành công
+  //     setMediaUrls((prev) => [...prev, ...response.data.map((fileName) => `${fileName}`)]);
+  //     message.success('Ảnh đã được tải lên thành công!');
+  //   } catch (error) {
+  //     console.error('Error uploading files:', error);
+  //     message.error('Tải lên ảnh thất bại!');
+  //   }
+  // };
 
   // Extract all sizes and colors from variants
   const allSizes = [...new Set(product.variants.map((variant) => variant.size))];
@@ -164,26 +259,35 @@ function ProductItem() {
   };
 
   // Handle adding to cart
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!selectedColor) {
       message.error('Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!');
       return;
     }
-
+  
     if (!selectedSize) {
       message.error('Vui lòng chọn kích cỡ trước khi thêm vào giỏ hàng!');
       return;
     }
-
+  
     if (quantity <= 0) {
       message.error('Vui lòng chọn số lượng lớn hơn 0!');
       return;
     }
-
-    if (addToCart(selectedVariant.id, quantity)) {
-      message.success('Thêm vào giỏ hàng thành công!');
-    } else {
-      message.error('Thêm vào giỏ hàng thất bại!');
+  
+    try {
+      const response = await addToCart(selectedVariant.id, quantity);
+  
+      // Kiểm tra phản hồi từ API
+      if (response && response.success) {
+        message.success(response.message || 'Thêm vào giỏ hàng thành công!');
+        await fetchCart(); // Cập nhật giỏ hàng
+      } else {
+        message.error(response?.message || 'Thêm vào giỏ hàng thất bại!');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      message.error('Đã xảy ra lỗi khi thêm vào giỏ hàng!');
     }
   };
   return (
@@ -424,26 +528,32 @@ function ProductItem() {
                 <strong>Đánh giá ({product?.reviewCount || 0})</strong>
               </div>
 
-              {/* Hiển thị sao trung bình */}
-              <div className={cx('star-rating')}>
-                {[...Array(5)].map((_, index) => {
-                  let rating = product?.rating || 0;
-                  let fullStars = Math.floor(rating);
-                  let hasHalfStar = rating % 1 >= 0.1 && rating % 1 <= 0.4;
-                  let isHalfStar = hasHalfStar && index === fullStars;
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span>({product?.rating || 0})</span>
 
-                  return (
-                    <span key={index} className={cx('icon-star')}>
-                      {index < fullStars ? (
-                        <FontAwesomeIcon icon={faStar} style={{ color: 'gold' }} />
-                      ) : isHalfStar ? (
-                        <FontAwesomeIcon icon={faStarHalfAlt} style={{ color: 'gold' }} />
-                      ) : (
-                        <FontAwesomeIcon icon={faStar} className={cx('regular-star')} />
-                      )}
-                    </span>
-                  );
-                })}
+                {/* Hiển thị sao trung bình */}
+                <div className={cx('star-rating')}>
+                  {[...Array(5)].map((_, index) => {
+                    let rating = product?.rating || 0;
+                    let fullStars = Math.floor(rating);
+                    let hasHalfStar = rating % 1 >= 0.1 && rating % 1 <= 0.4;
+                    let isHalfStar = hasHalfStar && index === fullStars;
+
+                    return (
+                      <div>
+                        <span key={index} className={cx('icon-star')}>
+                          {index < fullStars ? (
+                            <FontAwesomeIcon icon={faStar} style={{ color: 'gold' }} />
+                          ) : isHalfStar ? (
+                            <FontAwesomeIcon icon={faStarHalfAlt} style={{ color: 'gold' }} />
+                          ) : (
+                            <FontAwesomeIcon icon={faStar} className={cx('regular-star')} />
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Nút mở rộng / thu gọn */}
@@ -480,6 +590,19 @@ function ProductItem() {
                         </span>
                       </div>
                       <p className={cx('feedback-text')}>{feedback.feedbackText}</p>
+                      <div style={{ marginTop: '16px' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                          {Array.isArray(feedback.mediaUrls) &&
+                            feedback.mediaUrls.map((url, imgIndex) => (
+                              <img
+                                key={imgIndex}
+                                src={`${PUBLIC_API_URL}${url}`} // Hiển thị ảnh từ server
+                                alt={`Ảnh feedback ${imgIndex + 1}`} // Mô tả ngắn gọn và cụ thể
+                                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }}
+                              />
+                            ))}
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -513,6 +636,30 @@ function ProductItem() {
                         value={feedbackText}
                         onChange={(e) => setFeedbackText(e.target.value)}
                       />
+                      <Button
+                        component="label"
+                        role={undefined}
+                        variant="contained"
+                        tabIndex={-1}
+                        startIcon={<CloudUploadIcon />}
+                      >
+                        Upload files
+                        <VisuallyHiddenInput type="file" multiple onChange={handleFileChange} />
+                      </Button>
+                      <div style={{ marginTop: '16px' }}>
+                        <strong>Ảnh đã tải lên:</strong>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                          {Array.isArray(mediaUrls) &&
+                            mediaUrls.map((url, index) => (
+                              <img
+                                key={index}
+                                src={url.startsWith('blob:') ? url : `${PUBLIC_API_URL}/data/${url}`} // Kiểm tra URL tạm thời hoặc từ server
+                                alt={`Uploaded ${index}`}
+                                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }}
+                              />
+                            ))}
+                        </div>
+                      </div>
                       <div
                         style={{
                           display: 'flex',

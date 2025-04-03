@@ -18,11 +18,6 @@ const cx = classNames.bind(styles);
 const MENU_ITEMS = [
   { title: 'Profile', to: '/profile' },
   { title: 'Orders', to: '/orders' },
-  { title: 'Favourites', to: '/favourites' },
-  { title: 'Inbox', to: '/inbox' },
-  { title: 'Experiences', to: '/experiences' },
-  { title: 'Account Settings', to: '/accountsetting' },
-  { title: 'Admin', to: '/customermanagement' },
   { title: 'Log Out', to: '/login' },
 ];
 
@@ -46,26 +41,43 @@ function Header() {
     }
   }, []);
 
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
+
   const fetchCart = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) {
         message.warn('Người dùng chưa đăng nhập!');
         return;
       }
-
+  
+      console.log('Token:', token);
+  
       const response = await axios.get('http://localhost:8080/api/cart/', {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setCart(response.data.items || []); // Cập nhật trạng thái giỏ hàng
-      setTotalPrice(response.data.totalPrice || 0); // Cập nhật tổng giá trị
+  
+      setCart(response.data.items || []); // Update cart state
+      setTotalPrice(response.data.totalPrice || 0); // Update total price
+  
+      if (response.data.items.length === 0) {
+        console.info('Giỏ hàng của bạn đang trống.');
+      }
     } catch (error) {
-      if (error.response && error.response.status === 403) {
-        message.warn('Không có quyền truy cập. Chuyển hướng đến trang đăng nhập...');
-        window.location.href = '/login';
+      if (error.response) {
+        if (error.response.status === 403) {
+          message.warn('Không có quyền truy cập. Chuyển hướng đến trang đăng nhập...');
+          window.location.href = '/login';
+        } else if (error.response.status === 500) {
+          message.error('Lỗi máy chủ: Không thể tải giỏ hàng. Vui lòng thử lại sau.');
+        } else {
+          message.error(`Lỗi: ${error.response.data.message || 'Đã xảy ra lỗi không xác định.'}`);
+        }
       } else {
-        message.error('Lỗi khi lấy giỏ hàng:', error);
+        console.error('Lỗi khi lấy giỏ hàng:', error);
+        message.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
       }
     }
   };
@@ -106,9 +118,11 @@ function Header() {
   return (
     <header className={cx('wrapper')}>
       <div className={cx('inner')}>
-        <Link to={config.routes.home} className={cx('logo-link')}>
-          <img src={logo} alt="UnetFashion" className={cx('logo')} />
-        </Link>
+        <div className={cx('logo-link')}>
+          <Link to={config.routes.home} style={{ height: '100px' }}>
+            <img src={logo} alt="UnetFashion" className={cx('logo')} />
+          </Link>
+        </div>
 
         <ul className={cx('pre-desktop-menu')}>
           <Link to={config.routes.home} className={cx('pre-desktop-menu-item')}>
