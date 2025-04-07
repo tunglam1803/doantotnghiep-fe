@@ -260,7 +260,7 @@ const Order = () => {
       {/* Dialog thông báo */}
       <Modal
         title="Tạo đơn hàng thành công"
-        deprecated ={isModalVisible}
+        open ={isModalVisible}
         onOk={() => {
           sendBillToEmail();
           setIsModalVisible(false);

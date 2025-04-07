@@ -13,18 +13,7 @@
   }
   
   .btn-add {
-    font-size: 1.8rem;
-    width: 169px;
-    background: var(--primary);
-    border-radius: 24px;
-    color: white;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     margin-left: 40px;
-  
-    &:hover {
-      cursor: pointer;
-      opacity: 0.7;
-    }
   }
   
   .search-site {
@@ -58,88 +47,62 @@
   
   .table-site {
     width: 95%;
-    max-height: 80vh;
-    margin: 40px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    --tw-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07);
-    --tw-shadow-colored: 0px 8px 13px -3px var(--tw-shadow-color);
-    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-  }
-  
-  .close {
-    display: flex;
-    width: 100px;
-    height: 50px;
-  }
-  
-  .btn-close {
-    background-color: var(--primary);
-    font-size: 1.8rem;
-    color: white;
-    flex: 1;
-    margin: 8px;
-    border-radius: 16px;
-  
-    &:hover {
-      cursor: pointer;
-      opacity: 0.7px;
-    }
+    margin: 20px auto;
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   }
   
   .table {
-    display: flex;
-    flex-direction: column;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.4rem;
+    text-align: center;
   }
   
-  .table-grid {
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
-  
-  .row-site {
-    display: flex;
-    justify-content: center;
-    padding: 1.25rem;
+  thead {
     background-color: var(--primary);
-  }
-  
-  .row-title {
-    text-transform: uppercase;
-    font-size: 1.6rem;
-    font-weight: 500;
-    line-height: 1.5rem;
     color: white;
   }
   
-  .item-site {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.25rem;
-    font-size: 1.4rem;
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody tr:nth-child(even) {
     background-color: white;
   }
   
-  .item-content {
-    display: block;
+  tbody tr:hover {
+    background-color: #f0f8ff;
+    transition: background-color 0.3s ease;
   }
   
   .wrapper-icon {
     display: flex;
-    width: 100%;
     justify-content: center;
+    gap: 10px;
   }
   
   .icon-action {
     font-size: 1.6rem;
-    padding: 8px;
+    color: #ff4d4f;
+    cursor: pointer;
   
     &:hover {
-      cursor: pointer;
-      border-radius: 99px;
-      background-color: var(--primary);
-      color: white;
+      color: #d9363e;
     }
   }
   
+  .no-data {
+    text-align: center;
+    font-size: 1.6rem;
+    color: #888;
+    padding: 20px;
+  }

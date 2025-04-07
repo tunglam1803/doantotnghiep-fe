@@ -30,12 +30,12 @@ function Login() {
     let isValid = true;
 
     if (!username) {
-      setUsernameError('Please enter a username');
+      setUsernameError('Vui lòng nhập tên đăng nhập');
       isValid = false;
     }
 
     if (!password) {
-      setPasswordError('Please enter a password');
+      setPasswordError('Vui lòng nhập mật khẩu');
       isValid = false;
     }
 
@@ -63,7 +63,7 @@ function Login() {
         navigate(config.routes.home); // Redirect to home page
       }
     } catch (error) {
-      setApiError('Invalid username or password');
+      setApiError('Sai tên đăng nhập hoặc mật khẩu');
     }
   };
 
@@ -94,10 +94,10 @@ function Login() {
         <div className={cx('box-container')}>
           <div className={cx('left-side')}>
             <form className={cx('form')} onSubmit={handleSubmit}>
-              <h1 className={cx('form-title')}>Sign in to your account</h1>
+              <h1 className={cx('form-title')}>Đăng nhập</h1>
               <div className={cx('input-container')}>
                 <input
-                  placeholder="Enter Username"
+                  placeholder="Nhập tên đăng nhập"
                   type="text"
                   id="username"
                   value={username}
@@ -108,7 +108,7 @@ function Login() {
               </div>
               <div className={cx('input-container')}>
                 <input
-                  placeholder="Enter password"
+                  placeholder="Nhập mật khẩu"
                   type="password"
                   id="password"
                   value={password}
@@ -118,12 +118,12 @@ function Login() {
                 {passwordError && <p className={cx('error-message')}>{passwordError}</p>}
               </div>
               {apiError && <p className={cx('error-message')}>{apiError}</p>}
-              <button className={cx('submit')} type="submit">Sign in</button>
+              <button className={cx('submit')} type="submit">Đăng nhập</button>
               <p className={cx('signup-link')}>
-                No account?
-                <Link to={config.routes.register}> Sign up</Link>
+                Chưa có tài khoản?
+                <Link to={config.routes.register}> Đăng ký</Link>
               </p>
-              <Link to={config.routes.forgotpass} className={cx('forget-password')}> Forgot your password?</Link>
+              <Link to={config.routes.forgotpass} className={cx('forget-password')}> Quên mật khẩu?</Link>
             </form>
           </div>
           <div className={cx('right-side')}>
