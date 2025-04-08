@@ -192,32 +192,26 @@ function ProductItem() {
     }
   };
 
-  // const handleFileUpload = async (event) => {
-  //   const files = event.target.files;
-  //   const formData = new FormData();
-
-  //   // Thêm từng file vào formData
-  //   for (let i = 0; i < files.length; i++) {
-  //     formData.append('files', files[i]);
-  //   }
-
-  //   try {
-  //     // Gửi yêu cầu tải file lên server
-  //     const response = await axios.post(`${PUBLIC_API_URL}/api/feedback/upload`, formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm token nếu cần
-  //       },
-  //     });
-
-  //     // Cập nhật danh sách URL ảnh sau khi tải lên thành công
-  //     setMediaUrls((prev) => [...prev, ...response.data.map((fileName) => `${fileName}`)]);
-  //     message.success('Ảnh đã được tải lên thành công!');
-  //   } catch (error) {
-  //     console.error('Error uploading files:', error);
-  //     message.error('Tải lên ảnh thất bại!');
-  //   }
-  // };
+  const handleTryOn = () => {
+    Modal.confirm({
+      title: 'Xác nhận thử quần áo',
+      content: (
+        <div>
+          <p>Để thử quần áo, bạn cần tải ảnh quần áo không có người mẫu về trước.</p>
+          <p>Bạn có chắc chắn muốn tiếp tục không?</p>
+        </div>
+      ),
+      okText: 'Tiếp tục',
+      cancelText: 'Hủy',
+      onOk() {
+        const tryOnUrl = 'https://zhengchong-catvton.hf.space'; // URL của ứng dụng thử quần áo
+        window.open(tryOnUrl, '_blank'); // Mở ứng dụng trong tab mới
+      },
+      onCancel() {
+        message.info('Hãy tải ảnh trước khi thử quần áo.', 2);
+      },
+    });
+  };
 
   // Extract all sizes and colors from variants
   const allSizes = [...new Set(product.variants.map((variant) => variant.size))];
@@ -476,7 +470,7 @@ function ProductItem() {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className={cx('action-buttons')}>
                   <div className={cx('mt10-sm', 'mb6-sm', 'pr16-sm', 'pr10-lg', 'u-full-width', 'css-181b4yz')}>
                     <button
                       className={cx('ncss-btn-primary-dark', 'btn-lg', 'add-to-cart-btn')}
@@ -484,6 +478,11 @@ function ProductItem() {
                       // disabled={!selectedVariant || quantity <= 0}
                     >
                       Thêm vào giỏ
+                    </button>
+                  </div>
+                  <div className={cx('mt10-sm', 'mb6-sm', 'pr16-sm', 'pr10-lg', 'u-full-width', 'css-181b4yz')}>
+                    <button className={cx('ncss-btn-secondary-light', 'btn-lg', 'try-on-btn')} onClick={handleTryOn}>
+                      Thử quần áo
                     </button>
                   </div>
                 </div>

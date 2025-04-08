@@ -17,9 +17,8 @@ import { useFilter } from '~/components/Layout/components/Header/FilterContext';
 const cx = classNames.bind(styles);
 
 const MENU_ITEMS = [
-  { title: 'Profile', to: '/profile' },
-  { title: 'Orders', to: '/orders' },
-  { title: 'Log Out', to: '/login' },
+  { title: 'Thông tin cá nhân', to: '/profile' },
+  { title: 'Đăng xuất', to: '/login' },
 ];
 
 function Header() {
@@ -261,13 +260,13 @@ function Header() {
               render={(attrs) => (
                 <div className={cx('content')} tabIndex="-1" {...attrs}>
                   <PopperWrapper>
-                    <h2 className={cx('title-menu')}>Account</h2>
+                    <h2 className={cx('title-menu')}>Tài khoản</h2>
                     {MENU_ITEMS.map((item, index) => (
                       <Link
                         className={cx('menu-items')}
                         key={index}
                         to={item.to}
-                        onClick={item.title === 'Log Out' ? handleLogout : undefined}
+                        onClick={item.title === 'Đăng xuất' ? handleLogout : undefined}
                       >
                         {item.title}
                       </Link>
@@ -282,7 +281,7 @@ function Header() {
             </Tippy>
           ) : (
             <button className={cx('login-btn')}>
-              <Link to={config.routes.login}>Log in</Link>
+              <Link to={config.routes.login}>Đăng nhập</Link>
             </button>
           )}
         </div>

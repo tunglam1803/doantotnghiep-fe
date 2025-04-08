@@ -221,6 +221,12 @@
   padding: 18px 24px;
 }
 
+.action-buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
 .ncss-btn-primary-dark.add-to-cart-btn {
   padding: 6px 20px;
   border-top-left-radius: 20px;
@@ -234,6 +240,24 @@
   &:hover {
     background: #fff;
     color: #111;
+    cursor: pointer;
+  }
+}
+
+.ncss-btn-secondary-light.try-on-btn {
+  padding: 6px 30px;
+  border-top-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border: 1.5px solid #111;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  color: #000;
+  font-size: 1.8rem;
+  height: 48px;
+  &:hover {
+    background: #000;
+    color: #fff;
     cursor: pointer;
   }
 }

@@ -75,12 +75,18 @@ function ProductManagement() {
   };
 
   const handleChange = (e) => {
-    setPageSize(500);
-    setCurrentPage(1);
     const searchValue = e.target.value.toLowerCase();
-    if (!searchValue.startsWith(' ')) {
-      setSearchValue(searchValue);
+    setSearchValue(searchValue);
+  
+    if (!searchValue.trim()) {
+      // Nếu không có giá trị tìm kiếm, đặt pageSize về 3
+      setPageSize(3);
+    } else {
+      // Nếu có giá trị tìm kiếm, hiển thị tất cả kết quả
+      setPageSize(500);
     }
+  
+    setCurrentPage(1); // Đặt lại trang hiện tại về 1
   };
 
   useEffect(() => {
@@ -449,12 +455,14 @@ function ProductManagement() {
 
             {/* Biến thể */}
             <Form.Item label="Biến thể">
-              {product.variants?.map((variant, index) => (
+              {[
+                ...new Map(product.variants?.map((variant) => [`${variant.size}-${variant.color}`, variant])).values(),
+              ].map((variant, index) => (
                 <div
                   key={index}
                   style={{
                     display: 'flex',
-                    alignItems: 'center', // Căn giữa theo chiều dọc
+                    alignItems: 'center',
                     gap: '10px',
                     marginBottom: '10px',
                   }}
@@ -572,7 +580,7 @@ function ProductManagement() {
                       const newVariants = product.variants.filter((_, i) => i !== index);
                       setProduct({ ...product, variants: newVariants });
                     }}
-                    style={{ alignSelf: 'flex-end' }} // Đảm bảo nút căn thẳng hàng với các input
+                    style={{ alignSelf: 'flex-end' }}
                   >
                     Xóa
                   </Button>
@@ -638,25 +646,33 @@ function ProductManagement() {
                       <td>{selectedVariant.promotionalPrice || 'N/A'}đ</td>
                       <td>{pro.category ? pro.category.categoryName : 'Không có danh mục'}</td>
                       <td>
-                        <select
+                        <Select
                           value={
                             selectedVariant.size && selectedVariant.color
                               ? `${selectedVariant.size}-${selectedVariant.color}`
-                              : ''
+                              : undefined
                           }
-                          onChange={(e) =>
-                            handleVariantChange(
-                              pro.id,
-                              pro.variants.find((v) => `${v.size}-${v.color}` === e.target.value),
-                            )
-                          }
+                          onChange={(value) => {
+                            const variant = pro.variants.find((v) => `${v.size}-${v.color}` === value);
+                            handleVariantChange(pro.id, variant);
+                          }}
+                          placeholder="Chọn kích cỡ - màu sắc"
+                          style={{ width: '100%' }}
+                          dropdownStyle={{ maxHeight: 200, overflow: 'auto' }} // Giới hạn chiều cao dropdown
                         >
-                          {pro.variants.map((variant) => (
-                            <option key={`${variant.size}-${variant.color}`} value={`${variant.size}-${variant.color}`}>
+                          {[
+                            ...new Map(
+                              pro.variants.map((variant) => [`${variant.size}-${variant.color}`, variant]),
+                            ).values(),
+                          ].map((variant) => (
+                            <Select.Option
+                              key={`${variant.size}-${variant.color}`}
+                              value={`${variant.size}-${variant.color}`}
+                            >
                               {variant.size} - {variant.color}
-                            </option>
+                            </Select.Option>
                           ))}
-                        </select>
+                        </Select>
                       </td>
                       <td>{selectedVariant.material || 'N/A'}</td>
                       <td>{pro.brand}</td>
@@ -697,9 +713,21 @@ function ProductManagement() {
         showQuickJumper
         onChange={(page, size) => {
           setCurrentPage(page);
-          setPageSize(size);
+          setPageSize(size); // Cập nhật pageSize
         }}
-        showTotal={(total) => `Total ${total} items`}
+        showTotal={(total) => `Tổng cộng ${total} sản phẩm`} // Hiển thị tổng số sản phẩm
+        locale={{
+          items_per_page: 'Sản phẩm / Trang',
+          jump_to: 'Tới trang',
+          jump_to_confirm: 'Xác nhận',
+          page: '',
+          prev_page: 'Trang trước',
+          next_page: 'Trang sau',
+          prev_5: 'Quay lại 5 trang',
+          next_5: 'Tiến tới 5 trang',
+          prev_3: 'Quay lại 3 trang',
+          next_3: 'Tiến tới 3 trang',
+        }}
         style={{
           display: 'flex',
           justifyContent: 'center',

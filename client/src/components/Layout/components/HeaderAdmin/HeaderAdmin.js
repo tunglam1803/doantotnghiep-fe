@@ -13,7 +13,7 @@ function HeaderAdmin() {
     <header className={cx('wrapper')}>
       <div className={cx('inner')}>
         <Link to={config.routes.home} className={cx('logo-link')}>
-          <img src={logo} alt="DaShoe" className={cx('logo')} />
+          <img src={logo} alt="UnetFashion" className={cx('logo')} />
         </Link>
 
         <div className={cx('site-user')}>

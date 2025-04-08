@@ -1,4 +1,32 @@
 .wrapper {
-    height: 91.85vh;
-    background: #D8EDED;
-  }
+  background: #D8EDED;
+  padding: 20px;
+  margin-left: 350px;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+select {
+  margin-bottom: 20px;
+  padding: 5px 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.chart-container {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 400px; /* Giới hạn chiều cao */
+  max-width: 1100px; /* Giới hạn chiều rộng */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

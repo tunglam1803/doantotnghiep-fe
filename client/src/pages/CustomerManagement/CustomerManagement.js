@@ -33,7 +33,7 @@ function CustomerManagement() {
       ...values,
       is_deleted: values.is_deleted === 'Hoạt động' ? 0 : 1, // Chuyển trạng thái thành số
     };
-  
+
     axios
       .put(`${PUBLIC_API_URL}/api/users/updateUser/${selectedUser.id}`, updatedUser, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -92,7 +92,12 @@ function CustomerManagement() {
       .catch((err) => console.log(err));
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = (userId, userType) => {
+    if (userType === 'ADMIN') {
+      message.warning('Không thể xóa tài khoản ADMIN!', 3);
+      return;
+    }
+
     Modal.confirm({
       title: 'Bạn có chắc chắn muốn xóa người dùng này?',
       content: 'Hành động này không thể hoàn tác.',
@@ -184,7 +189,7 @@ function CustomerManagement() {
                       <FontAwesomeIcon
                         className={cx('icon-action')}
                         icon={faTrash}
-                        onClick={() => handleDeleteUser(cus.id)}
+                        onClick={() => handleDeleteUser(cus.id, cus.type)}
                       />
                     </div>
                   </td>
@@ -247,7 +252,7 @@ function CustomerManagement() {
             name="is_deleted"
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
           >
-            <Select>
+            <Select disabled={selectedUser?.type === 'ADMIN'}>
               <Select.Option value="Hoạt động">Hoạt động</Select.Option>
               <Select.Option value="Vô hiệu hóa">Vô hiệu hóa</Select.Option>
             </Select>

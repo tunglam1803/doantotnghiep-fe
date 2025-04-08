@@ -158,12 +158,18 @@ function Product() {
   };
 
   const handleChange = (e) => {
-    setPageSize(100);
-    setCurrentPage(1);
-    const value = e.target.value.toLowerCase();
-    if (!value.startsWith(' ')) {
-      setSearchValue(value); // Cập nhật giá trị tìm kiếm
+    const searchValue = e.target.value.toLowerCase();
+    setSearchValue(searchValue);
+
+    if (!searchValue.trim()) {
+      // Nếu không có giá trị tìm kiếm, đặt pageSize về 3
+      setPageSize(10);
+    } else {
+      // Nếu có giá trị tìm kiếm, hiển thị tất cả kết quả
+      setPageSize(500);
     }
+
+    setCurrentPage(1); // Đặt lại trang hiện tại về 1
   };
 
   const applyFilters = () => {
@@ -382,12 +388,8 @@ function Product() {
                     const secondImagePath = images[product.id]?.[1] || rawImagePath; // Ảnh thứ 2 hoặc fallback về ảnh đầu tiên
                     const imageUrl =
                       hoveredProductId === product.id
-                        ? secondImagePath.startsWith('/product-photo/')
-                          ? `${PUBLIC_API_URL}${secondImagePath}`
-                          : `${PUBLIC_API_URL}/uploads/${secondImagePath}`
-                        : rawImagePath.startsWith('/product-photo/')
-                        ? `${PUBLIC_API_URL}${rawImagePath}`
-                        : `${PUBLIC_API_URL}/uploads/${rawImagePath}`;
+                        ? `${PUBLIC_API_URL}${secondImagePath}`
+                        : `${PUBLIC_API_URL}${rawImagePath}`;
 
                     const price =
                       product.variants?.[0]?.promotionalPrice || product.variants?.[0]?.price || 'Chưa có giá';

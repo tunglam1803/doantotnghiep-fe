@@ -4,408 +4,226 @@ import styles from './OrderManagement.module.scss';
 import { useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleXmark, faMagnifyingGlass, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import MenuItem from '@mui/material/MenuItem';
-import { FormControl } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import Select from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
+import { Modal, Input, Select, Table, message } from 'antd';
 import axios from 'axios';
 
-const PUBLIC_API_URL = 'http://localhost:2000';
-
+const { Option } = Select;
 const cx = classNames.bind(styles);
+
+const PUBLIC_API_URL = 'http://localhost:8080';
 
 function OrderManagement() {
   const [searchValue, setSearchValue] = useState('');
   const [open, setOpen] = useState(false);
-  const [invoice, setInvoice] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [filteredInvoices, setFilteredInvoice] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const [invoiceEmpNo, setInvoiceEmpNo] = useState();
-  const [invoiceStatus, setInvoiceStatus] = useState('');
-  const [invoiceDate, setInvoiceDate] = useState('');
-  const [invoiceTotal, setInvoiceTotal] = useState('');
-  const [invoicePayment, setInoicePayment] = useState('');
-  const [invoiceCus, setInvoiceCus] = useState('');
-  // const [invoiceItems, setInvoiceItems] = useState('');
+  const [orderPaymentStatus, setOrderPaymentStatus] = useState('');
+  const [orderStatus, setOrderStatus] = useState('');
 
   const inputRef = useRef();
 
-  const handleClear = () => {
+  // Fetch orders from API
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = () => {
+    axios
+      .get(`${PUBLIC_API_URL}/api/orders/getOrderHistory/1`) // Thay `1` bằng userId động nếu cần
+      .then((res) => {
+        setOrders(res.data); // Lưu dữ liệu từ API vào state
+        setFilteredOrders(res.data); // Lưu dữ liệu để tìm kiếm
+      })
+      .catch((err) => console.error('Error fetching orders:', err));
+  };
+
+  // Handle search
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchValue(value);
+  
+    const filtered = orders.filter((order) =>
+      ['customerName', 'status', 'paymentStatus'].some(
+        (key) => order[key] && order[key].toLowerCase().includes(value),
+      ),
+    );
+    setFilteredOrders(filtered);
+  };
+
+  const handleClearSearch = () => {
     setSearchValue('');
+    setFilteredOrders(orders);
     inputRef.current.focus();
   };
 
-  const handleChange = (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    if (!searchValue.startsWith(' ')) {
-      setSearchValue(searchValue);
-    }
-  };
-
-  useEffect(() => {
-    const filteredInvoices = invoices.filter((inv) =>
-      Object.values(inv).some(
-        (value) => value && typeof value === 'string' && value.toLowerCase().includes(searchValue.toLowerCase()),
-      ),
-    );
-    setFilteredInvoice(filteredInvoices);
-  }, [searchValue, invoices]);
-
-  const handleClickOpen = (invoice) => {
-    if (invoice.id) {
-      setInvoice(invoice);
-      setInvoiceEmpNo(invoice.empNo);
-      setInvoiceStatus(invoice.status);
-      setInvoiceDate(invoice.data);
-      setInoicePayment(invoice.payment);
-      setInvoiceCus(invoice.customer);
-      // setInvoiceItems(invoice.items);
-    } else {
-      setInvoice({});
-      setInvoiceEmpNo('');
-      setInvoiceStatus('');
-      setInvoiceDate('');
-      setInoicePayment('');
-      setInvoiceCus('');
-      // setInvoiceItems('');
-    }
+  // Handle open/close modal
+  const handleOpenModal = (order) => {
+    setSelectedOrder(order);
+    setOrderStatus(order.status || ''); // Gán giá trị `status` từ đơn hàng
+    setOrderPaymentStatus(order.paymentStatus || ''); // Gán giá trị `paymentStatus` từ đơn hàng
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleCloseModal = () => {
     setOpen(false);
   };
 
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
-
-  const fetchInvoices = () => {
-    axios
-      .get(`${PUBLIC_API_URL}/api/invoices`)
-      .then((res) => setInvoices(res.data.invoices))
-      .catch((err) => console.log(err));
-  };
-
-  const handleAddInvoice = (newInvoice) => {
-    axios
-      .post(`${PUBLIC_API_URL}/api/invoices`, newInvoice)
-      .then(() => {
-        fetchInvoices();
-        handleClose();
-      })
-      .catch((err) => console.log(err));
-  };
-
-  const handleUpdateInvoice = (invoice) => {
-    axios
-      .put(`${PUBLIC_API_URL}/api/invoices/${invoice.id}`, invoice)
-      .then(() => {
-        fetchInvoices();
-        handleClose();
-      })
-      .catch((err) => console.log(err));
-  };
-
-  const handleDeleteInvoice = (invoice) => {
-    axios
-      .delete(`${PUBLIC_API_URL}/api/invoices/${invoice.id}`)
-      .then(() => {
-        fetchInvoices();
-      })
-      .catch((err) => console.log(err));
-  };
-
-  const handleSubmit = () => {
-    const invoiceData = {
-      empNo: invoiceEmpNo,
-      status: invoiceStatus,
-      date: invoiceDate,
-      payment: invoicePayment,
-      customer: invoiceCus,
-      // items: invoiceItems,
-    };
-
-    console.log(invoiceData);
-
-    if (
-      invoiceEmpNo.trim() === '' ||
-      invoiceStatus.trim() === '' ||
-      invoiceDate.trim() === '' ||
-      invoicePayment.trim() === '' ||
-      invoiceCus.trim() === ''
-      // invoiceItems.trim() === ''
-    ) {
-      console.log('Please fill in all invoice information.');
-      return;
-    }
-
-    if (invoice.id) {
-      const updatedinvoice = { ...invoice, ...invoiceData };
-      handleUpdateInvoice(updatedinvoice);
-    } else {
-      handleAddInvoice(invoiceData);
-    }
-
-    handleClose();
-  };
+  // Table columns
+  const columns = [
+    {
+      title: 'STT',
+      key: 'id',
+      render: (_, __, index) => index + 1, // Hiển thị STT tăng dần
+    },
+    {
+      title: 'Tên khách hàng',
+      dataIndex: 'customerName', // Sử dụng trường `customerName` từ API
+      key: 'customerName',
+      render: (name) => name || 'N/A', // Hiển thị tên hoặc 'N/A' nếu không có
+    },
+    {
+      title: 'Tổng tiền',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
+      render: (price) => `${price} VND`,
+    },
+    {
+      title: 'Phí vận chuyển',
+      dataIndex: 'shippingFee',
+      key: 'shippingFee',
+      render: (fee) => `${fee} VND`,
+    },
+    {
+      title: 'Phương thức vận chuyển',
+      dataIndex: 'shippingMethod',
+      key: 'shippingMethod',
+      render: (method) =>
+        (method === 'EXPRESS'
+          ? 'Giao hàng nhanh'
+          : method === 'STANDARD'
+          ? 'Giao hàng tiết kiệm'
+          : 'Giao hàng hỏa tốc') || 'N/A', // Hiển thị phương thức hoặc 'N/A' nếu không có
+    },
+    {
+      title: 'Trạng thái thanh toán',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+      render: (status) => (status === 'PAID' ? 'Đã thanh toán' : status === 'UNPAID' ? 'Chưa thanh toán' : 'N/A'), // Hiển thị trạng thái hoặc 'N/A' nếu không có
+    },
+    {
+      title: 'Phương thức thanh toán',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+      render: (method) => (method === 'VNPAY' ? 'VNPAY' : 'Thanh toán khi nhận được hàng') || 'N/A', // Hiển thị phương thức hoặc 'N/A' nếu không có
+    },
+    {
+      title: 'Trạng thái đơn hàng',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => {
+        switch (status) {
+          case 'PENDING':
+            return 'Đang chờ xử lý';
+          case 'SHIPPED':
+            return 'Đã giao hàng';
+          case 'DELIVERED':
+            return 'Đã giao hàng';
+          case 'CANCELLED':
+            return 'Đã hủy';
+          default:
+            return 'N/A';
+        }
+      },
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      render: (_, record) => (
+        <div className={cx('wrapper-icon')}>
+          <FontAwesomeIcon className={cx('icon-action')} icon={faPencil} onClick={() => handleOpenModal(record)} />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <section className={cx('wrapper')}>
+      {/* Search and Add Button */}
       <div className={cx('function-site')}>
-        <button variant="outlined" onClick={handleClickOpen} className={cx('btn-add')}>
-          ADD
-        </button>
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{invoice.id ? 'Edit Invoice' : 'Add Invoice'}</DialogTitle>
-          <form onSubmit={handleSubmit}>
-            <DialogContent>
-              <div className={cx('container')}>
-                <div className={cx('row-form')}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="Date"
-                    label="Product name"
-                    type="text"
-                    fullWidth
-                    variant="standard"
-                    autoComplete="on"
-                    value={invoiceDate}
-                    onChange={(e) => setInvoiceDate(e.target.value)}
-                  />
-                </div>
-                <div className={cx('row-form')}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="Date"
-                    label="Date"
-                    type="date"
-                    fullWidth
-                    variant="standard"
-                    autoComplete="on"
-                    value={invoiceDate}
-                    onChange={(e) => setInvoiceDate(e.target.value)}
-                  />
-                </div>
-                <div className={cx('row-form')}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="price"
-                    label="empNo"
-                    type="number"
-                    fullWidth
-                    variant="standard"
-                    autoComplete="on"
-                    value={invoiceEmpNo}
-                    onChange={(e) => setInvoiceEmpNo(e.target.value)}
-                  />
-                </div>
-                <div className={cx('column-form')}>
-                  <talbe className={cx('talbe-form')}>
-                    <thead>
-                      <tr>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
-                        <th>Cost</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <FormControl variant="standard">
-                            <Select labelId="demo-customized-select-label" id="demo-customized-select">
-                              <MenuItem value="">
-                                <em>None</em>
-                              </MenuItem>
-                              <MenuItem value={10}>Ten</MenuItem>
-                              <MenuItem value={20}>Twenty</MenuItem>
-                              <MenuItem value={30}>Thirty</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </td>
-                        <td>
-                          <TextField
-                            autoFocus
-                            margin="dense"
-                            id="price"
-                            label=""
-                            type="number"
-                            fullWidth
-                            variant="standard"
-                          />
-                        </td>
-                        <td>
-                          <TextField
-                            autoFocus
-                            margin="dense"
-                            id="price"
-                            label=""
-                            type="number"
-                            fullWidth
-                            variant="standard"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </talbe>
-                </div>
-                <div className={cx('row-form')}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="quantity"
-                    label="Total"
-                    type="number"
-                    fullWidth
-                    variant="standard"
-                    autoComplete="on"
-                    value={invoiceTotal}
-                    onChange={(e) => setInvoiceTotal(e.target.value)}
-                  />
-                </div>
-                <div className={cx('column-form')}>
-                  <FormControl variant="standard" sx={{ minWidth: 120 }}>
-                    <InputLabel id="demo-simple-select-filled-label">Status</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-filled-label"
-                      id="demo-simple-select-standard-select"
-                      value={invoiceStatus}
-                      onChange={(e) => setInvoiceStatus(e.target.value)}
-                    >
-                      <MenuItem value={'pending'}>Pending</MenuItem>
-                      <MenuItem value={'draft'}>Draf</MenuItem>
-                      <MenuItem value={'done'}>Done</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl variant="standard" sx={{ minWidth: 120 }}>
-                    <InputLabel id="demo-simple-select-filled-label">Payment</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-filled-label"
-                      id="demo-simple-select-standard-select"
-                      value={invoicePayment}
-                      onChange={(e) => setInoicePayment(e.target.value)}
-                    >
-                      <MenuItem value={'paid'}>Paid</MenuItem>
-                      <MenuItem value={'unpaid'}>Unpaid</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-              </div>
-            </DialogContent>
-          </form>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button
-              onClick={() => {
-                handleSubmit();
-                handleClose();
-              }}
-            >
-              {invoice.id ? 'Update Entry' : 'Submit'}
-            </Button>
-          </DialogActions>
-        </Dialog>
         <div className={cx('search-site')}>
           <button className={cx('search-btn')}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
           </button>
-          <input
+          <Input
             ref={inputRef}
             className={cx('input-search')}
-            name="text"
-            placeholder="Search..."
-            type="search"
+            placeholder="Tìm kiếm đơn hàng..."
             value={searchValue}
-            onChange={handleChange}
+            onChange={handleSearch}
           />
-          <button className={cx('clear')} onClick={handleClear}>
+          <button className={cx('clear')} onClick={handleClearSearch}>
             <FontAwesomeIcon icon={faCircleXmark} />
           </button>
         </div>
       </div>
-      <div className={cx('table-site')}>
-        <div className={cx('table')}>
-          <div className={cx('table-grid')}>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Invoice ID</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Date</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Employee</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Total</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Status</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Payment</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Customer</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Actions</h5>
-            </div>
-          </div>
-          {filteredInvoices.map((inv) => {
-            return (
-              <div key={inv.id} className={cx('table-grid', 'item-grid')}>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.id}</p>
-                </div>
-                <div className={cx('item-site1')}>
-                  <p className={cx('item-content')}>{inv.date}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.empNo}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.total}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.status}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.payment}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <p className={cx('item-content')}>{inv.customer}</p>
-                </div>
-                <div className={cx('item-site')}>
-                  <div className={cx('wrapper-icon')}>
-                    <FontAwesomeIcon
-                      className={cx('icon-action')}
-                      icon={faPencil}
-                      onClick={() => {
-                        handleClickOpen(inv);
-                      }}
-                    />
-                    <FontAwesomeIcon
-                      className={cx('icon-action')}
-                      icon={faTrash}
-                      onClick={() => handleDeleteInvoice(inv)}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+
+      {/* Orders Table */}
+      <Table
+        className={cx('table-site')}
+        columns={columns}
+        dataSource={filteredOrders}
+        rowKey="id"
+        pagination={{ pageSize: 5 }}
+      />
+
+      {/* Modal for Adding/Editing Order */}
+      <Modal
+        title="Chỉnh sửa trạng thái đơn hàng và thanh toán"
+        open={open}
+        onCancel={handleCloseModal}
+        onOk={() => {
+          axios
+            .put(`${PUBLIC_API_URL}/api/orders/${selectedOrder?.id}`, {
+              status: orderStatus,
+              paymentStatus: orderPaymentStatus, // Gửi thêm trạng thái thanh toán
+            })
+            .then(() => {
+              message.success('Cập nhật trạng thái thành công!');
+              fetchOrders(); // Tải lại danh sách đơn hàng
+              handleCloseModal();
+            })
+            .catch((err) => {
+              console.error('Error updating order:', err);
+              message.error('Lỗi khi cập nhật trạng thái!');
+            });
+        }}
+      >
+        {/* Trạng thái đơn hàng */}
+        <Select
+          placeholder="Trạng thái đơn hàng"
+          value={orderStatus}
+          onChange={(value) => setOrderStatus(value)}
+          style={{ width: '100%', marginBottom: '10px' }}
+        >
+          <Option value="PENDING">Đang xử lý</Option>
+          <Option value="DELIVERED">Đang vận chuyển</Option>
+          <Option value="SHIPPED">Đã giao hàng</Option>
+          <Option value="CANCELLED">Đã hủy</Option>
+        </Select>
+
+        {/* Trạng thái thanh toán */}
+        <Select
+          placeholder="Trạng thái thanh toán"
+          value={orderPaymentStatus}
+          onChange={(value) => setOrderPaymentStatus(value)}
+          style={{ width: '100%', marginBottom: '10px' }}
+        >
+          <Option value="PAID">Đã thanh toán</Option>
+          <Option value="UNPAID">Chưa thanh toán</Option>
+        </Select>
+      </Modal>
     </section>
   );
 }

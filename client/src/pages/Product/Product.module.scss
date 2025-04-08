@@ -9,6 +9,10 @@
   overflow-x: hidden;
 }
 
+.sidebar.visible {
+  transform: translateX(0); /* Hiển thị sidebar */
+}
+
 /* Tùy chỉnh thanh cuộn ngang */
 ::-webkit-scrollbar {
   height: 8px; /* Chiều cao thanh cuộn */

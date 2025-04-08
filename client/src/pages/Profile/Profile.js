@@ -229,7 +229,8 @@ const Profile = () => {
             <div className={cx('profile-header')}>
               <h1 className={cx('profile-title')}>TÀI KHOẢN CỦA TÔI</h1>
               <p className={cx('profile-note')}>
-                "Vì chính sách an toàn, bạn không thể thay đổi SĐT, Ngày sinh, Họ tên. Vui lòng liên hệ CSKH: 0123456789 nếu cần."
+                "Vì chính sách an toàn, bạn không thể thay đổi SĐT, Ngày sinh, Họ tên. Vui lòng liên hệ CSKH: 0123456789
+                nếu cần."
               </p>
               <Form
                 initialValues={{
@@ -279,6 +280,7 @@ const Profile = () => {
                   <thead>
                     <tr>
                       <th>STT</th>
+                      <th>Ngày đặt hàng</th>
                       <th style={{ width: '110px' }}>Tổng tiền</th>
                       <th>Phí vận chuyển</th>
                       <th>Phương thức vận chuyển</th>
@@ -290,6 +292,9 @@ const Profile = () => {
                     {orderHistory.map((order, index) => (
                       <tr key={order.id}>
                         <td>{index + 1}</td>
+                        <td>
+                          {moment(order.createdAt).format('DD/MM/YYYY')}
+                        </td>
                         <td>
                           {new Intl.NumberFormat('vi-VN', {
                             style: 'currency',
@@ -311,7 +316,15 @@ const Profile = () => {
                             : 'Giao hàng hỏa tốc'}
                         </td>
                         <td>{order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}</td>
-                        <td>{order.status}</td>
+                        <td>
+                          {order.status === 'PENDING'
+                            ? 'Đang xử lý'
+                            : order.status === 'DELIVERED'
+                            ? 'Đang vận chuyển'
+                            : order.status === 'SHIPPED'
+                            ? 'Đã giao'
+                            : 'Đã hủy'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
