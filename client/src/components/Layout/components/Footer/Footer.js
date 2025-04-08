@@ -54,19 +54,19 @@ const Footer = () => {
                             <h3 className={cx('footer__heading')}>Theo dõi tôi</h3>
                             <ul className={cx('footer-list')}>
                                 <li className={cx('footer-item')}>
-                                    <a href="/" className={cx('footer-item__link')}>
+                                    <a href="https://www.facebook.com/liLbiScUit203" className={cx('footer-item__link')}>
                                         <i className={cx('footer-item__icon', 'fab', 'fa-facebook')}></i>
                                         Facebook
                                     </a>
                                 </li>
                                 <li className={cx('footer-item')}>
-                                    <a href="/" className={cx('footer-item__link')}>
+                                    <a href="https://www.instagram.com/__lil.biscuit__/" className={cx('footer-item__link')}>
                                         <i className={cx('footer-item__icon', 'fab', 'fa-instagram')}></i>
                                         Instagram
                                     </a>
                                 </li>
                                 <li className={cx('footer-item')}>
-                                    <a href="/" className={cx('footer-item__link')}>
+                                    <a href="https://www.linkedin.com/in/tr%E1%BB%8Bnh-t%C3%B9ng-l%C3%A2m-483b88330/" className={cx('footer-item__link')}>
                                         <i className={cx('footer-item__icon', 'fab', 'fa-linkedin')}></i>
                                         Linkedin
                                     </a>

@@ -8,7 +8,8 @@
   display: flex;
   width: var(--default-layout-width);
   max-width: 100%;
-  margin-top: var(--admin-layout-header-height);
+  flex: 1;
+  margin-top: 100px;
   background-image: linear-gradient(
     to right top,
     #c4dfdf,

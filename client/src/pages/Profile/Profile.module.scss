@@ -1,0 +1,178 @@
+.profile-container {
+  max-width: 1480px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.profile-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.profile-note {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  padding: 5px;
+  background-color: #CCE5FF;
+}
+
+.profile-content {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-sidebar {
+  width: 25%;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar {
+  text-align: center;
+  margin-bottom: 20px;
+
+  img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-weight: bold;
+    font-size: 16px;
+  }
+}
+
+.profile-menu {
+  list-style: none;
+  padding: 0;
+
+  li {
+    padding: 10px 0;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+
+    &:hover {
+      color: #007bff;
+    }
+
+    &.active {
+      font-weight: bold;
+      color: #007bff;
+    }
+  }
+}
+
+.profile-main {
+  width: 100%;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-form {
+  .ant-form-item {
+    margin-bottom: 15px;
+  }
+
+  .ant-form-item-label > label {
+    font-weight: bold;
+  }
+}
+
+.form-actions {
+  display: flex;
+  margin-top: 20px;
+
+  .update-button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #333;
+    }
+  }
+
+  .password-button {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
+    padding: 10px 20px;
+    font-size: 14px;
+    margin-left: 25px;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center; /* Căn giữa nội dung */
+    font-size: 14px; /* Giảm kích thước chữ */
+  }
+
+  th {
+    background-color: #f4f4f4;
+    color: #000;
+    font-weight: bold;
+  }
+
+  tr:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+.profile-section {
+  margin-bottom: 20px; /* Giảm khoảng cách giữa các phần */
+}
+
+h2 {
+  font-size: 18px; /* Giảm kích thước tiêu đề */
+  margin-bottom: 10px;
+}
+
+.address-list {
+  list-style: none;
+  padding: 0;
+
+  .address-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+
+    p {
+      margin: 5px 0;
+    }
+
+    .address-actions {
+      margin-top: 10px;
+
+      button {
+        margin-right: 10px;
+      }
+    }
+  }
+}

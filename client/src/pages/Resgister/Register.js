@@ -72,46 +72,46 @@ function Register() {
         <div className={cx('box-container')}>
           <div className={cx('left-side')}>
             <form className={cx('form')} onSubmit={handleSubmit}>
-              <h1 className={cx('form-title')}>Sign up</h1>
+              <h1 className={cx('form-title')}>Đăng ký</h1>
 
               <div className={cx('input-container')}>
-                <input placeholder="Enter email" type="email" name="email" required value={formData.email} onChange={handleChange} />
+                <input placeholder="Nhập email" type="email" name="email" required value={formData.email} onChange={handleChange} />
                 {errors.email && <p className={cx('error-message')}>{errors.email}</p>}
               </div>
 
               <div className={cx('input-container')}>
-                <input placeholder="Enter username" type="text" name="userName" required value={formData.userName} onChange={handleChange} />
+                <input placeholder="Nhập tên tài khoản" type="text" name="userName" required value={formData.userName} onChange={handleChange} />
                 {errors.userName && <p className={cx('error-message')}>{errors.userName}</p>}
               </div>
 
               <div className={cx('input-container')}>
-                <input placeholder="Enter password" type="password" name="passWord" required value={formData.passWord} onChange={handleChange} />
+                <input placeholder="Nhập mật khẩu" type="password" name="passWord" required value={formData.passWord} onChange={handleChange} />
                 {errors.passWord && <p className={cx('error-message')}>{errors.passWord}</p>}
               </div>
 
               <div className={cx('input-container')}>
-                <input placeholder="Confirm password" type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleChange} />
+                <input placeholder="Xác nhận mật khẩu" type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleChange} />
                 {errors.confirmPassword && <p className={cx('error-message')}>{errors.confirmPassword}</p>}
               </div>
 
               <div className={cx('input-container')}>
-                <input placeholder="Enter phone number" type="tel" name="phone" required value={formData.phone} onChange={handleChange} />
+                <input placeholder="Nhập số điện thoại" type="tel" name="phone" required value={formData.phone} onChange={handleChange} />
                 {errors.phone && <p className={cx('error-message')}>{errors.phone}</p>}
               </div>
 
               <div className={cx('split-content')}>
                 <div className={cx('w-content')}>
-                  <input placeholder="Full name" type="text" name="fullName" required value={formData.fullName} onChange={handleChange} />
+                  <input placeholder="Họ và tên" type="text" name="fullName" required value={formData.fullName} onChange={handleChange} />
                   {errors.fullName && <p className={cx('error-message')}>{errors.fullName}</p>}
                 </div>
                 <div className={cx('w-content')}>
-                  <input placeholder="Address" type="text" name="address" required value={formData.address} onChange={handleChange} />
+                  <input placeholder="Địa chỉ" type="text" name="address" required value={formData.address} onChange={handleChange} />
                   {errors.address && <p className={cx('error-message')}>{errors.address}</p>}
                 </div>
               </div>
 
               <div className={cx('input-container')}>
-                <input placeholder="Date of Birth" type="date" name="dateOfBirth" required value={formData.dateOfBirth} onChange={handleChange} />
+                <input placeholder="Ngày sinh" type="date" name="dateOfBirth" required value={formData.dateOfBirth} onChange={handleChange} />
                 {errors.dateOfBirth && <p className={cx('error-message')}>{errors.dateOfBirth}</p>}
               </div>
 
@@ -127,9 +127,10 @@ function Register() {
               </div>
 
               <button className={cx('submit')} type="submit">
-                Sign up
+                Đăng ký
               </button>
-              <a href="/Login">Sign in?</a>
+              <p className={cx('have-account')}>Bạn đã có tài khoản?</p>
+              <a href="/Login">Đăng nhập?</a>
             </form>
           </div>
 

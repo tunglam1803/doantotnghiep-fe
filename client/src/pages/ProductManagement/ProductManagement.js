@@ -3,31 +3,11 @@ import styles from './ProductManagement.module.scss';
 import { useEffect, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencil, faTrash, faMagnifyingGlass, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
-import { FormControl, InputLabel, MenuItem, Select, Box } from '@mui/material';
 import axios from 'axios';
-import { message } from 'antd';
 import { Pagination } from 'antd';
+import { Modal, Form, Input, Select, Button, message } from 'antd';
 
 import { styled } from '@mui/material/styles';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
 
 const PUBLIC_API_URL = 'http://localhost:8080';
 
@@ -70,9 +50,9 @@ function ProductManagement() {
       setMaterial(product.material || '');
       setSize(product.size || '');
       setBrand(product.brand || '');
-      setImages(product.images || []);
+      setImages(product.images || []); // Đặt ảnh hiện tại nếu sửa sản phẩm
     } else {
-      resetForm();
+      resetForm(); // Đặt lại form nếu thêm sản phẩm mới
     }
     setOpen(true);
   };
@@ -88,19 +68,25 @@ function ProductManagement() {
     setPrice(null);
     setCategory_ids([]);
     setColor('');
-    setMaterial(''); // Đặt lại chất liệu
-    setSize(''); // Đặt lại kích cỡ
-    setBrand(''); // Đặt lại nhãn hiệu
-    setImages(['']);
+    setMaterial('');
+    setSize('');
+    setBrand('');
+    setImages([]); // Đặt lại mảng images thành rỗng
   };
 
   const handleChange = (e) => {
-    setPageSize(1000000);
-    setCurrentPage(1);
     const searchValue = e.target.value.toLowerCase();
-    if (!searchValue.startsWith(' ')) {
-      setSearchValue(searchValue);
+    setSearchValue(searchValue);
+  
+    if (!searchValue.trim()) {
+      // Nếu không có giá trị tìm kiếm, đặt pageSize về 3
+      setPageSize(3);
+    } else {
+      // Nếu có giá trị tìm kiếm, hiển thị tất cả kết quả
+      setPageSize(500);
     }
+  
+    setCurrentPage(1); // Đặt lại trang hiện tại về 1
   };
 
   useEffect(() => {
@@ -181,11 +167,15 @@ function ProductManagement() {
     }
 
     // Thêm ảnh vào FormData
-    product.images.forEach((image, index) => {
-      if (image instanceof File) {
-        formData.append('photos', image); // API yêu cầu key là `photos`
-      }
-    });
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        if (image instanceof File) {
+          formData.append('photos', image); // Gửi ảnh mới
+        }
+      });
+    } else {
+      formData.append('photos', ''); // Gửi key `photos` với giá trị rỗng nếu không có ảnh mới
+    }
 
     // Gửi dữ liệu lên API
     axios
@@ -204,82 +194,30 @@ function ProductManagement() {
       });
   };
 
-  // const handleAddProduct = (product) => {
-  //   const formData = new FormData();
-
-  //   // Thêm thông tin sản phẩm vào FormData
-  //   formData.append('productName', product.productName);
-  //   formData.append('describe', product.describe);
-  //   formData.append('price', product.price);
-  //   formData.append('promotionalPrice', product.promotionalPrice);
-  //   formData.append('categoryId', product.categoryId);
-  //   formData.append('color', product.color);
-  //   formData.append('size', product.size);
-  //   formData.append('material', product.material);
-  //   formData.append('brand', product.brand);
-
-  //   // Thêm danh sách biến thể (variants) vào FormData
-  //   if (Array.isArray(product.variants)) {
-  //     product.variants.forEach((variant, index) => {
-  //       formData.append(`variants[${index}].color`, variant.color);
-  //       formData.append(`variants[${index}].size`, variant.size);
-  //       formData.append(`variants[${index}].material`, variant.material);
-  //       formData.append(`variants[${index}].price`, variant.price);
-  //       formData.append(`variants[${index}].stock`, variant.stock);
-  //       formData.append(`variants[${index}].discountPercentage`, variant.discountPercentage);
-  //       formData.append(`variants[${index}].promotionalPrice`, variant.promotionalPrice);
-  //     });
-  //   }
-
-  //   // Thêm ảnh vào FormData
-  //   product.images.forEach((image, index) => {
-  //     if (image instanceof File) {
-  //       formData.append('photos', image); // API yêu cầu key là `photos`
-  //     }
-  //   });
-
-  //   // Gửi dữ liệu lên API
-  //   axios
-  //     .post(`${PUBLIC_API_URL}/api/products/addProductNew`, formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     })
-  //     .then((res) => {
-  //       message.success('Thêm sản phẩm thành công!');
-  //       fetchProducts(); // Làm mới danh sách sản phẩm
-  //     })
-  //     .catch((err) => {
-  //       console.error('Error adding product:', err.response?.data || err.message);
-  //       message.error('Không thể thêm sản phẩm. Vui lòng thử lại!');
-  //     });
-  // };
-
   const handleDeleteProduct = (product) => {
-    axios
-      .delete(`${PUBLIC_API_URL}/api/products/deleteProduct/${product.id}`)
-      .then(() => {
-        message.success('Xóa sản phẩm thành công!');
-        fetchProducts();
-      })
-      .catch((err) => {
-        console.error('Error deleting product:', err.response?.data || err.message);
-        message.error('Không thể xóa sản phẩm. Vui lòng thử lại!');
-      });
+    Modal.confirm({
+      title: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
+      content: `Sản phẩm: ${product.productName}`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk() {
+        axios
+          .delete(`${PUBLIC_API_URL}/api/products/deleteProduct/${product.id}`)
+          .then(() => {
+            message.success('Xóa sản phẩm thành công!');
+            fetchProducts(); // Làm mới danh sách sản phẩm
+          })
+          .catch((err) => {
+            console.error('Error deleting product:', err.response?.data || err.message);
+            message.error('Không thể xóa sản phẩm. Vui lòng thử lại!');
+          });
+      },
+      onCancel() {
+        message.info('Hủy xóa sản phẩm.');
+      },
+    });
   };
-
-  // const handleAddVariant = (variant) => {
-  //   axios
-  //     .post(`${PUBLIC_API_URL}/api/products/${variant.id}/addVariant`, variant)
-  //     .then(() => {
-  //       message.success('Thêm biến thể thành công!');
-  //       fetchProducts();
-  //     })
-  //     .catch((err) => {
-  //       console.error('Error adding variant:', err.response?.data || err.message);
-  //       message.error('Không thể thêm biến thể. Vui lòng thử lại!');
-  //     });
-  // };
 
   const handleSubmit = async () => {
     if (!name || !description || !category_ids.length) {
@@ -344,58 +282,9 @@ function ProductManagement() {
     }
   };
 
-  // const handleSubmit = async () => {
-  //   if (!name || !description || !category_ids.length) {
-  //     message.error('Vui lòng điền đầy đủ thông tin sản phẩm.');
-  //     return;
-  //   }
-
-  //   if (parseFloat(price) <= 0 || price == null) {
-  //     message.error('Giá sản phẩm phải lớn hơn 0.');
-  //     return;
-  //   }
-
-  //   // Kiểm tra danh mục
-  //   if (!category_ids[0]) {
-  //     message.error('Vui lòng chọn danh mục.');
-  //     return;
-  //   }
-
-  //   const productData = {
-  //     id: product?.id || null,
-  //     productName: name,
-  //     describe: description,
-  //     price,
-  //     promotionalPrice,
-  //     categoryId: category_ids[0],
-  //     color,
-  //     size,
-  //     material,
-  //     brand,
-  //     images,
-  //     variants: product?.variants || [], // Đảm bảo variants luôn là một mảng
-  //   };
-
-  //   try {
-  //     if (product?.id) {
-  //       if (product.productName !== name || product.describe !== description || product.price !== price) {
-  //         await handleUpdateProduct(productData);
-  //       } else {
-  //         await handleAddVariant(productData);
-  //       }
-  //     } else {
-  //       await handleAddProduct(productData);
-  //     }
-  //     handleClose();
-  //   } catch (err) {
-  //     console.error('Error submitting product:', err.response?.data || err.message);
-  //     message.error('Không thể thêm hoặc cập nhật sản phẩm. Vui lòng thử lại!');
-  //   }
-  // };
-
   const handleUpdateProduct = (product) => {
     const formData = new FormData();
-  
+
     // Thêm thông tin sản phẩm vào FormData
     formData.append('productName', product.productName);
     formData.append('describe', product.describe);
@@ -406,7 +295,7 @@ function ProductManagement() {
     formData.append('size', product.size);
     formData.append('material', product.material);
     formData.append('brand', product.brand);
-  
+
     // Thêm danh sách biến thể (variants) vào FormData
     if (Array.isArray(product.variants)) {
       product.variants.forEach((variant, index) => {
@@ -414,24 +303,27 @@ function ProductManagement() {
         formData.append(`variants[${index}].size`, variant.size);
         formData.append(`variants[${index}].material`, variant.material);
         formData.append(`variants[${index}].price`, variant.price);
-        formData.append(`variants[${index}].stock`, variant.stock); // Thêm stock
+        formData.append(`variants[${index}].stock`, variant.stock);
         formData.append(`variants[${index}].discountPercentage`, variant.discountPercentage);
         formData.append(`variants[${index}].promotionalPrice`, variant.promotionalPrice);
       });
     }
-  
-    // Thêm ảnh vào FormData
-    product.images.forEach((image, index) => {
-      if (image instanceof File) {
-        formData.append('photos', image); // API yêu cầu key là `photos`
-      }
-    });
-  
+
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        if (image instanceof File) {
+          formData.append('photos', image); // Gửi ảnh mới
+        }
+      });
+    } else {
+      formData.append('photos', ''); // Gửi key `photos` với giá trị rỗng nếu không có ảnh mới
+    }
+
     // Gửi dữ liệu lên API
     axios
       .put(`${PUBLIC_API_URL}/api/products/updateProduct/${product.id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data', // Đảm bảo gửi đúng định dạng
+          'Content-Type': 'multipart/form-data',
         },
       })
       .then(() => {
@@ -455,9 +347,8 @@ function ProductManagement() {
     }));
   };
 
-  const handleChangeImage = (index, file) => {
-    const newImages = [...images];
-    newImages[index] = file; // Lưu file vào mảng
+  const handleChangeImage = (files) => {
+    const newImages = [...images, ...Array.from(files)]; // Thêm tất cả các tệp được chọn vào mảng `images`
     setImages(newImages);
   };
 
@@ -467,17 +358,12 @@ function ProductManagement() {
     setImages(newImages);
   };
 
-  // Hàm để thêm một ảnh mới vào danh sách
-  const handleAddImage = () => {
-    setImages([...images, '']); // Thêm một chuỗi rỗng vào mảng
-  };
-
   return (
     <section className={cx('wrapper')}>
       <div className={cx('function-site')}>
-        <button variant="outlined" onClick={() => handleClickOpen()} className={cx('btn-add')}>
+        <Button type="primary" onClick={() => handleClickOpen()} className={cx('btn-add')}>
           Thêm sản phẩm
-        </button>
+        </Button>
         <div className={cx('search-site')}>
           <button className={cx('search-btn')}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
@@ -495,211 +381,152 @@ function ProductManagement() {
             <FontAwesomeIcon icon={faCircleXmark} />
           </button>
         </div>
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{product?.id ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}</DialogTitle>
-          <DialogContent>
-            <div className={cx('container')}>
-              {/* Tên sản phẩm */}
-              <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Tên sản phẩm"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+        <Modal
+          title={product?.id ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}
+          open={open}
+          onCancel={handleClose}
+          onOk={handleSubmit}
+          okText={product?.id ? 'Cập nhật' : 'Thêm'}
+          cancelText="Hủy"
+          width={900} // Đặt chiều rộng modal
+        >
+          <Form layout="vertical">
+            {/* Tên sản phẩm */}
+            <Form.Item label="Tên sản phẩm" required>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nhập tên sản phẩm" />
+            </Form.Item>
 
-              {/* Mô tả sản phẩm */}
-              <TextField
-                margin="dense"
-                id="description"
-                label="Mô tả sản phẩm"
-                type="text"
-                fullWidth
-                variant="standard"
+            {/* Mô tả sản phẩm */}
+            <Form.Item label="Mô tả sản phẩm" required>
+              <Input.TextArea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                placeholder="Nhập mô tả sản phẩm"
               />
+            </Form.Item>
 
-              {/* Giá sản phẩm */}
-              {/* <TextField
-                margin="dense"
-                id="price"
-                label="Giá sản phẩm"
-                type="number"
-                fullWidth
-                variant="standard"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              /> */}
+            {/* Danh mục */}
+            <Form.Item label="Danh mục" required>
+              <Select
+                value={category_ids[0] || ''}
+                onChange={(value) => setCategory_ids([value])}
+                placeholder="Chọn danh mục"
+              >
+                {categories.map((category) => (
+                  <Select.Option key={category.id} value={category.id}>
+                    {category.categoryName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-              {/* Giá khuyến mãi (tính theo phần trăm) */}
-              {/* <TextField
-                margin="dense"
-                id="discount"
-                label="Phần trăm giảm giá (%)"
-                type="number"
-                fullWidth
-                variant="standard"
-                value={discount}
-                onChange={(e) => setDiscount(e.target.value)}
-              /> */}
+            {/* Nhãn hiệu */}
+            <Form.Item label="Nhãn hiệu">
+              <Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Nhập nhãn hiệu" />
+            </Form.Item>
 
-              {/* Danh mục */}
-              <FormControl fullWidth margin="dense">
-                <InputLabel>Danh mục</InputLabel>
-                <Select
-                  value={category_ids[0] || ''} // Đảm bảo giá trị mặc định là ''
-                  onChange={(e) => setCategory_ids([e.target.value])}
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id}>
-                      {category.categoryName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Nhãn hiệu */}
-              <TextField
-                margin="dense"
-                id="brand"
-                label="Nhãn hiệu"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-              />
-
-              {/* Ảnh */}
-              <Box>
+            {/* Ảnh */}
+            <Form.Item label="Ảnh">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Hiển thị danh sách ảnh đã chọn */}
                 {images.map((image, index) => (
-                  <Box key={index} display="flex" alignItems="center" gap={2}>
-                    <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
-                      Upload file
-                      <VisuallyHiddenInput
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleChangeImage(index, e.target.files[0])} // Lấy file từ input
-                      />
-                    </Button>
-                    {image && <p>{image.name || 'Đã chọn ảnh'}</p>} {/* Hiển thị tên file */}
-                    <Button variant="outlined" color="error" onClick={() => handleRemoveImage(index)}>
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span>{image instanceof File ? image.name : image}</span>
+                    <Button danger onClick={() => handleRemoveImage(index)}>
                       Xóa
                     </Button>
-                  </Box>
+                  </div>
                 ))}
-                <Button onClick={handleAddImage}>Thêm ảnh</Button>
-              </Box>
 
-              <Box>
-                {product.variants?.map((variant, index) => (
-                  <Box key={index} display="flex" alignItems="center" gap={2}>
-                    {/* Kích cỡ */}
-                    <FormControl fullWidth margin="dense">
-                      <InputLabel>Kích cỡ</InputLabel>
-                      <Select
-                        value={variant.size}
-                        onChange={(e) => {
-                          const newVariants = [...product.variants];
-                          newVariants[index].size = e.target.value;
-                          setProduct({ ...product, variants: newVariants });
-                        }}
-                      >
-                        <MenuItem value="S">S</MenuItem>
-                        <MenuItem value="XS">XS</MenuItem>
-                        <MenuItem value="M">M</MenuItem>
-                        <MenuItem value="L">L</MenuItem>
-                        <MenuItem value="XL">XL</MenuItem>
-                        <MenuItem value="XXL">XXL</MenuItem>
-                        <MenuItem value="XXXL">XXXL</MenuItem>
-                      </Select>
-                    </FormControl>
+                {/* Input để tải lên nhiều ảnh */}
+                <Button type="primary" onClick={() => document.getElementById('upload-images').click()}>
+                  Upload file
+                </Button>
+                <input
+                  id="upload-images"
+                  type="file"
+                  accept="image/*"
+                  multiple // Cho phép chọn nhiều ảnh
+                  style={{ display: 'none' }}
+                  onChange={(e) => handleChangeImage(e.target.files)}
+                />
+              </div>
+            </Form.Item>
 
-                    {/* Màu sắc */}
-                    <FormControl fullWidth margin="dense">
-                      <InputLabel>Màu sắc</InputLabel>
-                      <Select
-                        value={variant.color}
-                        onChange={(e) => {
-                          const newVariants = [...product.variants];
-                          newVariants[index].color = e.target.value;
-                          setProduct({ ...product, variants: newVariants });
-                        }}
-                      >
-                        <MenuItem value="red">Đỏ</MenuItem>
-                        <MenuItem value="blue">Xanh</MenuItem>
-                        <MenuItem value="green">Lục</MenuItem>
-                        <MenuItem value="black">Đen</MenuItem>
-                        <MenuItem value="white">Trắng</MenuItem>
-                        <MenuItem value="orange">Cam</MenuItem>
-                        <MenuItem value="yellow">Vàng</MenuItem>
-                        <MenuItem value="purple">Tím</MenuItem>
-                        <MenuItem value="brown">Nâu</MenuItem>
-                        <MenuItem value="gray">Xám</MenuItem>
-                        <MenuItem value="pink">Hồng</MenuItem>
-                        <MenuItem value="cyan">Lục lam</MenuItem>
-                        <MenuItem value="magenta">Đỏ tươi</MenuItem>
-                        <MenuItem value="beige">Be</MenuItem>
-                        <MenuItem value="gold">Vàng kim</MenuItem>
-                        <MenuItem value="silver">Bạc</MenuItem>
-                        <MenuItem value="navy">Xanh nước biển</MenuItem>
-                        <MenuItem value="teal">Xanh mòng két</MenuItem>
-                        <MenuItem value="maroon">Nâu đỏ</MenuItem>
-                        <MenuItem value="olive">Xanh ô liu</MenuItem>
-                        <MenuItem value="indigo">Chàm</MenuItem>
-                        <MenuItem value="violet">Tím violet</MenuItem>
-                        <MenuItem value="turquoise">Ngọc lam</MenuItem>
-                        <MenuItem value="lavender">Oải hương</MenuItem>
-                      </Select>
-                    </FormControl>
+            {/* Biến thể */}
+            <Form.Item label="Biến thể">
+              {[
+                ...new Map(product.variants?.map((variant) => [`${variant.size}-${variant.color}`, variant])).values(),
+              ].map((variant, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginBottom: '10px',
+                  }}
+                >
+                  {/* Kích cỡ */}
+                  <Form.Item label="Kích cỡ" style={{ marginBottom: 0 }}>
+                    <Select
+                      value={variant.size}
+                      onChange={(value) => {
+                        const newVariants = [...product.variants];
+                        newVariants[index].size = value;
+                        setProduct({ ...product, variants: newVariants });
+                      }}
+                      placeholder="Chọn kích cỡ"
+                      style={{ width: '100px' }}
+                    >
+                      <Select.Option value="S">S</Select.Option>
+                      <Select.Option value="XS">XS</Select.Option>
+                      <Select.Option value="M">M</Select.Option>
+                      <Select.Option value="L">L</Select.Option>
+                      <Select.Option value="XL">XL</Select.Option>
+                      <Select.Option value="XXL">XXL</Select.Option>
+                      <Select.Option value="XXXL">XXXL</Select.Option>
+                    </Select>
+                  </Form.Item>
 
-                    {/* Chất liệu */}
-                    <TextField
-                      margin="dense"
-                      id="material"
-                      label="Chất liệu"
-                      type="text"
-                      fullWidth
-                      variant="standard"
+                  {/* Màu sắc */}
+                  <Form.Item label="Màu sắc" style={{ marginBottom: 0 }}>
+                    <Select
+                      value={variant.color}
+                      onChange={(value) => {
+                        const newVariants = [...product.variants];
+                        newVariants[index].color = value;
+                        setProduct({ ...product, variants: newVariants });
+                      }}
+                      placeholder="Chọn màu sắc"
+                      style={{ width: '120px' }}
+                    >
+                      <Select.Option value="red">Đỏ</Select.Option>
+                      <Select.Option value="blue">Xanh</Select.Option>
+                      <Select.Option value="green">Lục</Select.Option>
+                      <Select.Option value="black">Đen</Select.Option>
+                      <Select.Option value="white">Trắng</Select.Option>
+                    </Select>
+                  </Form.Item>
+
+                  {/* Chất liệu */}
+                  <Form.Item label="Chất liệu" style={{ marginBottom: 0 }}>
+                    <Input
                       value={variant.material}
                       onChange={(e) => {
                         const newVariants = [...product.variants];
                         newVariants[index].material = e.target.value;
                         setProduct({ ...product, variants: newVariants });
                       }}
+                      placeholder="Nhập chất liệu"
+                      style={{ width: '150px' }}
                     />
-                    {/* <TextField
-                      label="Màu sắc"
-                      value={variant.color}
-                      onChange={(e) => {
-                        const newVariants = [...product.variants];
-                        newVariants[index].color = e.target.value;
-                        setProduct({ ...product, variants: newVariants });
-                      }}
-                    /> */}
-                    {/* <TextField
-                      label="Kích cỡ"
-                      value={variant.size}
-                      onChange={(e) => {
-                        const newVariants = [...product.variants];
-                        newVariants[index].size = e.target.value;
-                        setProduct({ ...product, variants: newVariants });
-                      }}
-                    /> */}
+                  </Form.Item>
 
-                    <TextField
-                      label="Giá"
+                  {/* Giá */}
+                  <Form.Item label="Giá" style={{ marginBottom: 0 }}>
+                    <Input
                       type="number"
-                      id="price"
-                      name="price"
-                      fullWidth
-                      variant="standard"
-                      margin="dense"
                       value={variant.price}
                       onChange={(e) => {
                         const newVariants = [...product.variants];
@@ -711,217 +538,203 @@ function ProductManagement() {
                         );
                         setProduct({ ...product, variants: newVariants });
                       }}
+                      placeholder="Nhập giá"
+                      style={{ width: '100px' }}
                     />
+                  </Form.Item>
 
-                    <TextField
-                      margin="dense"
-                      id="discount"
-                      label="Phần trăm giảm giá (%)"
+                  {/* Giảm giá */}
+                  <Form.Item label="Giảm giá (%)" style={{ marginBottom: 0 }}>
+                    <Input
                       type="number"
-                      fullWidth
-                      variant="standard"
                       value={variant.discountPercentage}
                       onChange={(e) => {
                         const newVariants = [...product.variants];
-                        newVariants[index].discountPercentage = e.target.value;
+                        newVariants[index].discountPercentage = parseFloat(e.target.value) || 0;
                         setProduct({ ...product, variants: newVariants });
                       }}
+                      placeholder="Nhập % giảm giá"
+                      style={{ width: '100px' }}
                     />
+                  </Form.Item>
 
-                    {/* Thêm trường nhập liệu cho stock */}
-                    <TextField
-                      label="Số lượng tồn kho"
+                  {/* Tồn kho */}
+                  <Form.Item label="Tồn kho" style={{ marginBottom: 0 }}>
+                    <Input
                       type="number"
-                      id="stock"
-                      name="stock"
-                      fullWidth
-                      variant="standard"
-                      margin="dense"
                       value={variant.stock}
                       onChange={(e) => {
                         const newVariants = [...product.variants];
-                        const stock = parseInt(e.target.value, 10) || 0; // Chuyển đổi giá trị nhập thành số nguyên
-                        newVariants[index].stock = stock;
+                        newVariants[index].stock = parseInt(e.target.value, 10) || 0;
                         setProduct({ ...product, variants: newVariants });
                       }}
+                      placeholder="Nhập tồn kho"
+                      style={{ width: '100px' }}
                     />
+                  </Form.Item>
 
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => {
-                        const newVariants = product.variants.filter((_, i) => i !== index);
-                        setProduct({ ...product, variants: newVariants });
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                  </Box>
-                ))}
-                <Button
-                  onClick={() => {
-                    const newVariants = [
-                      ...(product.variants || []),
-                      { color: '', size: '', price: 0, stock: 0, discountPercentage: 0, material: '' },
-                    ];
-                    setProduct({ ...product, variants: newVariants });
-                  }}
-                >
-                  Thêm biến thể
-                </Button>
-              </Box>
-            </div>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Hủy</Button>
-            <Button onClick={handleSubmit}>{product?.id ? 'Cập nhật' : 'Thêm'}</Button>
-          </DialogActions>
-        </Dialog>
+                  {/* Nút Xóa */}
+                  <Button
+                    danger
+                    onClick={() => {
+                      const newVariants = product.variants.filter((_, i) => i !== index);
+                      setProduct({ ...product, variants: newVariants });
+                    }}
+                    style={{ alignSelf: 'flex-end' }}
+                  >
+                    Xóa
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="dashed"
+                onClick={() => {
+                  const newVariants = [
+                    ...(product.variants || []),
+                    { color: '', size: '', price: 0, stock: 0, discountPercentage: 0, material: '' },
+                  ];
+                  setProduct({ ...product, variants: newVariants });
+                }}
+              >
+                Thêm biến thể
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
       <div className={cx('table-site')}>
-        <div className={cx('table')}>
-          <div className={cx('table-grid')}>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>STT</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Tên sản phẩm</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Mô tả</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Ảnh</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Giá</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Giá khuyến mãi</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Danh mục</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Kích cỡ - Màu sắc</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Chất liệu</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Nhãn hiệu</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Số lượng tồn kho</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Hành động</h5>
-            </div>
-          </div>
-          {currentProducts.length > 0 ? (
-            currentProducts
-              .filter((pro) => (pro.productName?.toLowerCase() || '').includes(searchValue))
-              .map((pro, index) => {
-                const selectedVariant = selectedVariants[pro.id] || pro.variants[0] || {}; // Lấy biến thể đầu tiên nếu chưa chọn
-                return (
-                  <div key={pro.id} className={cx('table-grid', 'item-grid')}>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{indexOfFirstProduct + index + 1}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{pro.productName}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{pro.describe}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      {pro.images && pro.images.length > 0 ? (
-                        <img src={`${PUBLIC_API_URL}${pro.images[0]}`} alt="Product" className={cx('product-image')} />
-                      ) : (
-                        <p>Không có ảnh</p>
-                      )}
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{selectedVariant.price || 'N/A'}đ</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{selectedVariant.promotionalPrice || 'N/A'}đ</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>
-                        {pro.category ? pro.category.categoryName : 'Không có danh mục'}
-                      </p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <select
-                        value={
-                          selectedVariant.size && selectedVariant.color
-                            ? `${selectedVariant.size}-${selectedVariant.color}`
-                            : ''
-                        }
-                        onChange={(e) =>
-                          handleVariantChange(
-                            pro.id,
-                            pro.variants.find((v) => `${v.size}-${v.color}` === e.target.value),
-                          )
-                        }
-                      >
-                        {pro.variants.map((variant) => (
-                          <option key={`${variant.size}-${variant.color}`} value={`${variant.size}-${variant.color}`}>
-                            {variant.size} - {variant.color}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{selectedVariant.material || 'N/A'}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{pro.brand}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <p className={cx('item-content')}>{selectedVariant.stock || 'N/A'}</p>
-                    </div>
-                    <div className={cx('item-site')}>
-                      <div className={cx('wrapper-icon')}>
-                        <FontAwesomeIcon
-                          className={cx('icon-action')}
-                          icon={faPencil}
-                          onClick={() => handleClickOpen(pro)}
-                        />
-                        <FontAwesomeIcon
-                          className={cx('icon-action')}
-                          icon={faTrash}
-                          onClick={() => handleDeleteProduct(pro)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-          ) : (
-            <p className={cx('no-data')}>Không có sản phẩm nào.</p>
-          )}
-        </div>
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={products.length}
-          showSizeChanger
-          showQuickJumper
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          }}
-          showTotal={(total) => `Total ${total} items`}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '20px',
-            marginBottom: '20px',
-          }}
-        />
+        <table className={cx('table')}>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên sản phẩm</th>
+              <th>Mô tả</th>
+              <th>Ảnh</th>
+              <th>Giá</th>
+              <th>Giá khuyến mãi</th>
+              <th>Danh mục</th>
+              <th>Kích cỡ - Màu sắc</th>
+              <th>Chất liệu</th>
+              <th>Nhãn hiệu</th>
+              <th>Số lượng tồn kho</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentProducts.length > 0 ? (
+              currentProducts
+                .filter((pro) => (pro.productName?.toLowerCase() || '').includes(searchValue))
+                .map((pro, index) => {
+                  const selectedVariant = selectedVariants[pro.id] || pro.variants[0] || {}; // Lấy biến thể đầu tiên nếu chưa chọn
+                  return (
+                    <tr key={pro.id}>
+                      <td>{indexOfFirstProduct + index + 1}</td>
+                      <td>{pro.productName}</td>
+                      <td>{pro.describe}</td>
+                      <td>
+                        {pro.images && pro.images.length > 0 ? (
+                          <img
+                            src={`${PUBLIC_API_URL}${pro.images[0]}`}
+                            alt="Product"
+                            className={cx('product-image')}
+                          />
+                        ) : (
+                          <p>Không có ảnh</p>
+                        )}
+                      </td>
+                      <td>{selectedVariant.price || 'N/A'}đ</td>
+                      <td>{selectedVariant.promotionalPrice || 'N/A'}đ</td>
+                      <td>{pro.category ? pro.category.categoryName : 'Không có danh mục'}</td>
+                      <td>
+                        <Select
+                          value={
+                            selectedVariant.size && selectedVariant.color
+                              ? `${selectedVariant.size}-${selectedVariant.color}`
+                              : undefined
+                          }
+                          onChange={(value) => {
+                            const variant = pro.variants.find((v) => `${v.size}-${v.color}` === value);
+                            handleVariantChange(pro.id, variant);
+                          }}
+                          placeholder="Chọn kích cỡ - màu sắc"
+                          style={{ width: '100%' }}
+                          dropdownStyle={{ maxHeight: 200, overflow: 'auto' }} // Giới hạn chiều cao dropdown
+                        >
+                          {[
+                            ...new Map(
+                              pro.variants.map((variant) => [`${variant.size}-${variant.color}`, variant]),
+                            ).values(),
+                          ].map((variant) => (
+                            <Select.Option
+                              key={`${variant.size}-${variant.color}`}
+                              value={`${variant.size}-${variant.color}`}
+                            >
+                              {variant.size} - {variant.color}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </td>
+                      <td>{selectedVariant.material || 'N/A'}</td>
+                      <td>{pro.brand}</td>
+                      <td>{selectedVariant.stock || 'N/A'}</td>
+                      <td>
+                        <div className={cx('wrapper-icon')}>
+                          <FontAwesomeIcon
+                            className={cx('icon-action')}
+                            icon={faPencil}
+                            onClick={() => handleClickOpen(pro)}
+                          />
+                          <FontAwesomeIcon
+                            className={cx('icon-action')}
+                            icon={faTrash}
+                            onClick={() => handleDeleteProduct(pro)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+            ) : (
+              <tr>
+                <td colSpan="12" className={cx('no-data')}>
+                  Không có sản phẩm nào.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={products.length}
+        showSizeChanger
+        showQuickJumper
+        onChange={(page, size) => {
+          setCurrentPage(page);
+          setPageSize(size); // Cập nhật pageSize
+        }}
+        showTotal={(total) => `Tổng cộng ${total} sản phẩm`} // Hiển thị tổng số sản phẩm
+        locale={{
+          items_per_page: 'Sản phẩm / Trang',
+          jump_to: 'Tới trang',
+          jump_to_confirm: 'Xác nhận',
+          page: '',
+          prev_page: 'Trang trước',
+          next_page: 'Trang sau',
+          prev_5: 'Quay lại 5 trang',
+          next_5: 'Tiến tới 5 trang',
+          prev_3: 'Quay lại 3 trang',
+          next_3: 'Tiến tới 3 trang',
+        }}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: '20px',
+          marginBottom: '20px',
+        }}
+      />
     </section>
   );
 }

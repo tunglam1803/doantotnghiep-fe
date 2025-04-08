@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCartShopping,
@@ -13,13 +13,14 @@ import classNames from 'classnames/bind';
 import styles from './Product.module.scss';
 import config from '~/config';
 import axios from 'axios';
-import { Pagination, Slider } from 'antd';
+import { Pagination, Slider, Breadcrumb, message } from 'antd';
+import { useFilter } from '~/components/Layout/components/Header/FilterContext';
 
 const cx = classNames.bind(styles);
 const PUBLIC_API_URL = 'http://localhost:8080';
 
 function Product() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({ price: [], size: [], color: [], keyword: '' });
   const [currentPage, setCurrentPage] = useState(1); // Current page
@@ -37,70 +38,97 @@ function Product() {
   const [selectedPrice, setSelectedPrice] = useState([]);
   const [selectedSize, setSelectedSize] = useState([]);
   const [selectedColor, setSelectedColor] = useState([]);
+  const { categoryId } = useFilter();
+  const [hoveredProductId, setHoveredProductId] = useState(null);
+  const [categoryName, setCategoryName] = useState('');
 
   useEffect(() => {
-    fetchProducts();
-  }, [filters, currentPage, pageSize]);
+    if (categoryId || currentPage || pageSize) {
+      fetchProducts();
+    }
+  }, [categoryId, currentPage, pageSize]);
 
   useEffect(() => {
     setPageSize(visible ? 8 : 10);
     setCurrentPage(1); // Reset to the first page when pageSize changes
   }, [visible]);
 
-  const fetchProducts = async () => {
+  const token = localStorage.getItem('token');
+
+  const fetchProducts = useCallback(async () => {
     try {
-      let url = `${PUBLIC_API_URL}/api/products/get-all-product`;
-      const params = { ...filters, page: currentPage - 1, pageSize }; // Đổi tên size thành pageSize
-  
+      let url;
+      const params = { page: currentPage - 1, pageSize };
+
+      if (categoryId) {
+        url = `${PUBLIC_API_URL}/api/products/getAllCategory/${categoryId}`;
+      } else {
+        url = `${PUBLIC_API_URL}/api/products/get-all-product`;
+      }
+
       if (filters.color && filters.color.length > 0) {
         params.color = filters.color.map((color) => color.toLowerCase()).join(',');
       }
       if (filters.size && filters.size.length > 0) {
-        params.size = filters.size.join(','); // Gửi size dưới dạng chuỗi phân tách bằng dấu phẩy
+        params.size = filters.size.join(',');
       }
-  
+      if (filters.price && filters.price.length === 2) {
+        params.price = filters.price.join(',');
+      }
+
       if (Object.values(filters).some((value) => value && value.length > 0)) {
         url = `${PUBLIC_API_URL}/api/products/filterProduct`;
       }
-  
-      console.log('Request URL:', url);
-      console.log('Request Params:', params);
-  
-      const res = await axios.get(url, { params });
-  
+
+      const queryString = new URLSearchParams(params).toString();
+      const res = await axios.get(`${url}?${queryString}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const productList = res.data.products || res.data;
-  
+
       if (Array.isArray(productList) && productList.length > 0) {
         setProducts(productList);
         setTotalItems(res.data.totalElements || productList.length);
-  
-        // Fetch images for each product
+
+        const firstProduct = productList[0];
+        if (firstProduct && firstProduct.category) {
+          setCategoryName(firstProduct.category.categoryName);
+        }
+
         const imagePromises = productList.map(async (product) => {
-          const res = await axios.get(`${PUBLIC_API_URL}/api/products/${product.id}/images`);
+          const res = await axios.get(`${PUBLIC_API_URL}/api/products/${product.id}/images`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           return { productId: product.id, images: res.data };
         });
-  
+
         const imageResults = await Promise.all(imagePromises);
         const imageMap = {};
         imageResults.forEach(({ productId, images }) => {
           imageMap[productId] = images;
         });
-  
+
         setImages(imageMap);
       } else {
         setProducts([]);
         setTotalItems(0);
+        setCategoryName('Danh mục');
       }
     } catch (err) {
       console.error('Lỗi khi lấy danh sách sản phẩm:', err.message);
       setProducts([]);
       setTotalItems(0);
+      setCategoryName('Danh mục');
     }
-  };
+  }, [categoryId, currentPage, pageSize, filters, token]);
 
   const handleFilterChange = (name, value) => {
-    setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reset to the first page when filters change
+    setFilters((prev) => ({ ...prev, [name]: value })); // Cập nhật bộ lọc
   };
 
   const handlePriceChange = (range) => {
@@ -130,12 +158,23 @@ function Product() {
   };
 
   const handleChange = (e) => {
-    setPageSize(10000);
-    setCurrentPage(1);
     const searchValue = e.target.value.toLowerCase();
-    if (!searchValue.startsWith(' ')) {
-      setSearchValue(searchValue);
+    setSearchValue(searchValue);
+
+    if (!searchValue.trim()) {
+      // Nếu không có giá trị tìm kiếm, đặt pageSize về 3
+      setPageSize(10);
+    } else {
+      // Nếu có giá trị tìm kiếm, hiển thị tất cả kết quả
+      setPageSize(500);
     }
+
+    setCurrentPage(1); // Đặt lại trang hiện tại về 1
+  };
+
+  const applyFilters = () => {
+    setCurrentPage(1); // Reset về trang đầu tiên
+    fetchProducts(); // Gọi API để lấy sản phẩm theo bộ lọc
   };
 
   return (
@@ -161,14 +200,15 @@ function Product() {
               <Slider
                 range
                 min={0}
-                max={1000000}
+                max={15000000}
                 step={10000}
-                defaultValue={[0, 500000]} // Giá trị mặc định
+                defaultValue={[0, 1000000]} // Giá trị mặc định
                 onChange={handlePriceChange} // Gọi hàm khi giá trị thay đổi
                 tooltip={{ formatter: (value) => `${value.toLocaleString()}đ` }} // Hiển thị tooltip với định dạng tiền tệ
               />
               <div className={cx('price-range-display')}>
-                <span>{selectedPrice[0]?.toLocaleString()}đ</span> - <span>{selectedPrice[1]?.toLocaleString()}đ</span>
+                <span>{(selectedPrice[0] ?? 0).toLocaleString()}đ</span>
+                <span>{(selectedPrice[1] ?? 1000000).toLocaleString()}đ</span>
               </div>
             </div>
           )}
@@ -178,7 +218,7 @@ function Product() {
         <div className={cx('Collapsible')}>
           <span className={cx('Collapsible_trigger')}>
             <div className={cx('trigger-content')}>
-              <div className={cx('trigger-content_label')}>Size</div>
+              <div className={cx('trigger-content_label')}>Kích cỡ</div>
               <div>
                 <button
                   className={cx('trigger-content_icon', collapsedSize ? '-is-up' : '-is-down')}
@@ -249,6 +289,9 @@ function Product() {
         </div>
 
         <div className={cx('filter-actions')}>
+          <button className={cx('filter-btn')} onClick={applyFilters}>
+            Lọc
+          </button>
           <button
             className={cx('filter-clear-btn')}
             onClick={() => {
@@ -256,6 +299,7 @@ function Product() {
               setSelectedPrice([]);
               setSelectedSize([]);
               setSelectedColor([]);
+              setCurrentPage(1); // Reset về trang đầu tiên
               fetchProducts(); // Gọi lại API để hiển thị tất cả sản phẩm
             }}
           >
@@ -270,6 +314,49 @@ function Product() {
             <button className={cx('filters-btn')} onClick={() => setVisible(!visible)}>
               <FontAwesomeIcon icon={faSliders} />
             </button>
+
+            <Breadcrumb
+              style={{ marginLeft: '16px', display: 'flex', alignItems: 'center' }}
+              items={[
+                {
+                  title: <Link to="/">Trang chủ</Link>,
+                },
+                {
+                  title: (
+                    <Link
+                      to="#"
+                      onClick={(e) => {
+                        e.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+                        if (categoryName !== 'Sản phẩm') {
+                          setCategoryName('Sản phẩm'); // Đặt lại tên danh mục
+                          setFilters((prevFilters) => {
+                            if (
+                              prevFilters.price.length === 0 &&
+                              prevFilters.size.length === 0 &&
+                              prevFilters.color.length === 0 &&
+                              prevFilters.keyword === ''
+                            ) {
+                              return prevFilters; // Không cập nhật nếu bộ lọc đã trống
+                            }
+                            return { price: [], size: [], color: [], keyword: '' }; // Reset bộ lọc
+                          });
+                          if (currentPage !== 1) {
+                            setCurrentPage(1); // Chỉ reset về trang đầu tiên nếu cần
+                          }
+                          fetchProducts(); // Gọi API để lấy toàn bộ sản phẩm
+                        }
+                      }}
+                    >
+                      Danh mục
+                    </Link>
+                  ),
+                },
+                {
+                  title: categoryName || 'Sản phẩm',
+                },
+              ]}
+            />
+
             <div className={cx('search-site')}>
               <button className={cx('search-btn')}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
@@ -293,47 +380,57 @@ function Product() {
         <main>
           <section>
             <div className={cx('product-grid_items', { 'product-grid_items--sub': visible })}>
-            {products.length > 0 ? (
-  products.map((product) => {
-    const rawImagePath = images[product.id]?.[0] || '';
-    const imageUrl = rawImagePath
-      ? rawImagePath.startsWith('/product-photo/')
-        ? `${PUBLIC_API_URL}${rawImagePath}`
-        : `${PUBLIC_API_URL}/uploads/${rawImagePath}`
-      : '/default-img.jpg';
+              {products.length > 0 ? (
+                products
+                  .filter((product) => product.productName.toLowerCase().includes(searchValue.toLowerCase()))
+                  .map((product) => {
+                    const rawImagePath = images[product.id]?.[0] || '';
+                    const secondImagePath = images[product.id]?.[1] || rawImagePath; // Ảnh thứ 2 hoặc fallback về ảnh đầu tiên
+                    const imageUrl =
+                      hoveredProductId === product.id
+                        ? `${PUBLIC_API_URL}${secondImagePath}`
+                        : `${PUBLIC_API_URL}${rawImagePath}`;
 
-    const price =
-      product.variants?.[0]?.promotionalPrice || product.variants?.[0]?.price || 'Chưa có giá';
+                    const price =
+                      product.variants?.[0]?.promotionalPrice || product.variants?.[0]?.price || 'Chưa có giá';
 
-    return (
-      <div key={product.id} className={cx('product-card', { 'product-card--sub': visible })}>
-        <Link to={`${config.routes.productItem}/${product.id}`} className={cx('product-card_link')}>
-          <img alt={product.productName} className={cx('product-card_hero-image')} src={imageUrl} />
-        </Link>
-        <div className={cx('product-card_info')}>
-          <p className={cx('product-card_info-title')}>{product.productName}</p>
-          <div className={cx('product-card_info-body-parent')}>
-            <p className={cx('product-card_info-body')}>
-              {typeof price === 'number'
-                ? price.toLocaleString('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
+                    return (
+                      <div key={product.id} className={cx('product-card', { 'product-card--sub': visible })}>
+                        <Link to={`${config.routes.productItem}/${product.id}`} className={cx('product-card_link')}>
+                          <img
+                            alt={product.productName}
+                            className={cx('product-card_hero-image')}
+                            src={imageUrl}
+                            onMouseEnter={() => setHoveredProductId(product.id)} // Cập nhật trạng thái khi hover
+                            onMouseLeave={() => setHoveredProductId(null)}
+                          />
+                        </Link>
+                        <div className={cx('product-card_info')}>
+                          <p className={cx('product-card_info-title')} title={product.productName}>
+                            {product.productName}
+                          </p>
+                          <div className={cx('product-card_info-body-parent')}>
+                            <p className={cx('product-card_info-body')}>
+                              {typeof price === 'number'
+                                ? price.toLocaleString('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND',
+                                  })
+                                : price}
+                            </p>
+                            <Link to={`${config.routes.productItem}/${product.id}`}>
+                              <button className={cx('product-card_btn')}>
+                                <FontAwesomeIcon className={cx('product-card_btn-shopping')} icon={faCartShopping} />
+                              </button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
                   })
-                : price}
-            </p>
-            <Link to={`${config.routes.productItem}/${product.id}`}>
-              <button className={cx('product-card_btn')}>
-                <FontAwesomeIcon className={cx('product-card_btn-shopping')} icon={faCartShopping} />
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  })
-) : (
-  <p>Không có sản phẩm nào.</p>
-)}
+              ) : (
+                <p>Không có sản phẩm nào.</p>
+              )}
             </div>
           </section>
 
@@ -345,9 +442,21 @@ function Product() {
             showQuickJumper
             onChange={(page, size) => {
               setCurrentPage(page);
-              setPageSize(size);
+              setPageSize(size); // Cập nhật pageSize
             }}
-            showTotal={(total) => `Total ${total} items`}
+            showTotal={(total) => `Tổng cộng ${total} sản phẩm`} // Hiển thị tổng số sản phẩm
+            locale={{
+              items_per_page: 'Sản phẩm / Trang',
+              jump_to: 'Tới trang',
+              jump_to_confirm: 'Xác nhận',
+              page: '',
+              prev_page: 'Trang trước',
+              next_page: 'Trang sau',
+              prev_5: 'Quay lại 5 trang',
+              next_5: 'Tiến tới 5 trang',
+              prev_3: 'Quay lại 3 trang',
+              next_3: 'Tiến tới 3 trang',
+            }}
             style={{
               display: 'flex',
               justifyContent: 'center',

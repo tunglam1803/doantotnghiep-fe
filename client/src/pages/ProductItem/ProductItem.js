@@ -6,17 +6,11 @@ import classNames from 'classnames/bind';
 import styles from './productItem.module.scss';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { message } from 'antd';
 import { useCart } from '../Cart/CartProvider';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Modal, Input, Rate, message } from 'antd';
 
 const cx = classNames.bind(styles);
 
@@ -48,7 +42,7 @@ function ProductItem() {
   const [selectedImage, setSelectedImage] = useState('');
   const [startIndex, setStartIndex] = useState(0);
   const { addToCart } = useCart();
-  const {cart, setCart} = useCart();
+  const { cart, setCart } = useCart();
   const [totalPrice, setTotalPrice] = useState(0);
   const { id } = useParams();
   const [open, setOpen] = React.useState(false);
@@ -99,21 +93,21 @@ function ProductItem() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        message.warn('Người dùng chưa đăng nhập!');
+        message.warn('Bạn chưa chưa đăng nhập!', 2);
         return;
       }
-  
+
       const response = await axios.get(`${PUBLIC_API_URL}/api/cart/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       console.log('Cart Response:', response.data);
-  
+
       setCart(response.data.items || []); // Update cart state
       setTotalPrice(response.data.totalPrice || 0); // Update total price
     } catch (error) {
       console.error('Error fetching cart:', error);
-      message.error('Không thể tải giỏ hàng. Vui lòng thử lại sau.');
+      message.error('Không thể tải giỏ hàng. Vui lòng thử lại sau.', 2);
     }
   };
 
@@ -190,40 +184,34 @@ function ProductItem() {
       setFeedbackText(''); // Reset form
       setRating(0); // Reset đánh giá
       setMediaUrls([]); // Reset danh sách URL ảnh
-      message.success('Đánh giá của bạn đã được gửi thành công!');
+      message.success('Đánh giá của bạn đã được gửi thành công!', 2);
       setOpen(false); // Đóng dialog
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      message.error('Gửi đánh giá thất bại!');
+      message.error('Gửi đánh giá thất bại!', 2);
     }
   };
 
-  // const handleFileUpload = async (event) => {
-  //   const files = event.target.files;
-  //   const formData = new FormData();
-
-  //   // Thêm từng file vào formData
-  //   for (let i = 0; i < files.length; i++) {
-  //     formData.append('files', files[i]);
-  //   }
-
-  //   try {
-  //     // Gửi yêu cầu tải file lên server
-  //     const response = await axios.post(`${PUBLIC_API_URL}/api/feedback/upload`, formData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm token nếu cần
-  //       },
-  //     });
-
-  //     // Cập nhật danh sách URL ảnh sau khi tải lên thành công
-  //     setMediaUrls((prev) => [...prev, ...response.data.map((fileName) => `${fileName}`)]);
-  //     message.success('Ảnh đã được tải lên thành công!');
-  //   } catch (error) {
-  //     console.error('Error uploading files:', error);
-  //     message.error('Tải lên ảnh thất bại!');
-  //   }
-  // };
+  const handleTryOn = () => {
+    Modal.confirm({
+      title: 'Xác nhận thử quần áo',
+      content: (
+        <div>
+          <p>Để thử quần áo, bạn cần tải ảnh quần áo không có người mẫu về trước.</p>
+          <p>Bạn có chắc chắn muốn tiếp tục không?</p>
+        </div>
+      ),
+      okText: 'Tiếp tục',
+      cancelText: 'Hủy',
+      onOk() {
+        const tryOnUrl = 'https://zhengchong-catvton.hf.space'; // URL của ứng dụng thử quần áo
+        window.open(tryOnUrl, '_blank'); // Mở ứng dụng trong tab mới
+      },
+      onCancel() {
+        message.info('Hãy tải ảnh trước khi thử quần áo.', 2);
+      },
+    });
+  };
 
   // Extract all sizes and colors from variants
   const allSizes = [...new Set(product.variants.map((variant) => variant.size))];
@@ -242,8 +230,8 @@ function ProductItem() {
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.target.getBoundingClientRect();
     setMousePosition({
-      x: ((e.pageX - left) / width) * 100,
-      y: ((e.pageY - top) / height) * 100,
+      x: ((e.clientX - left) / width) * 100,
+      y: ((e.clientX - top) / height) * 100,
     });
   };
 
@@ -261,33 +249,33 @@ function ProductItem() {
   // Handle adding to cart
   const handleAddToCart = async () => {
     if (!selectedColor) {
-      message.error('Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!');
+      message.error('Vui lòng chọn màu sắc trước khi thêm vào giỏ hàng!', 2);
       return;
     }
-  
+
     if (!selectedSize) {
-      message.error('Vui lòng chọn kích cỡ trước khi thêm vào giỏ hàng!');
+      message.error('Vui lòng chọn kích cỡ trước khi thêm vào giỏ hàng!', 2);
       return;
     }
-  
+
     if (quantity <= 0) {
-      message.error('Vui lòng chọn số lượng lớn hơn 0!');
+      message.error('Vui lòng chọn số lượng sản phẩm!', 2);
       return;
     }
-  
+
     try {
       const response = await addToCart(selectedVariant.id, quantity);
-  
+
       // Kiểm tra phản hồi từ API
       if (response && response.success) {
-        message.success(response.message || 'Thêm vào giỏ hàng thành công!');
+        message.success(response.message || 'Thêm vào giỏ hàng thành công!', 2);
         await fetchCart(); // Cập nhật giỏ hàng
       } else {
-        message.error(response?.message || 'Thêm vào giỏ hàng thất bại!');
+        message.error(response?.message || 'Thêm vào giỏ hàng thất bại!', 2);
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
-      message.error('Đã xảy ra lỗi khi thêm vào giỏ hàng!');
+      message.error('Đã xảy ra lỗi khi thêm vào giỏ hàng!', 2);
     }
   };
   return (
@@ -482,7 +470,7 @@ function ProductItem() {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className={cx('action-buttons')}>
                   <div className={cx('mt10-sm', 'mb6-sm', 'pr16-sm', 'pr10-lg', 'u-full-width', 'css-181b4yz')}>
                     <button
                       className={cx('ncss-btn-primary-dark', 'btn-lg', 'add-to-cart-btn')}
@@ -490,6 +478,11 @@ function ProductItem() {
                       // disabled={!selectedVariant || quantity <= 0}
                     >
                       Thêm vào giỏ
+                    </button>
+                  </div>
+                  <div className={cx('mt10-sm', 'mb6-sm', 'pr16-sm', 'pr10-lg', 'u-full-width', 'css-181b4yz')}>
+                    <button className={cx('ncss-btn-secondary-light', 'btn-lg', 'try-on-btn')} onClick={handleTryOn}>
+                      Thử quần áo
                     </button>
                   </div>
                 </div>
@@ -609,82 +602,63 @@ function ProductItem() {
                   <p className={cx('no-feedback')}>Chưa có đánh giá nào</p>
                 )}
                 <React.Fragment>
-                  <Button variant="outlined" onClick={handleClickOpen}>
+                  <Button onClick={handleClickOpen} variant="contained" color="primary">
                     Tạo đánh giá
                   </Button>
-                  <Dialog
+                  <Modal
+                    title="Đánh giá"
                     open={open}
-                    onClose={handleClose}
-                    component="form"
-                    onSubmit={handleSubmitFeedback}
-                    maxWidth="sm"
-                    fullWidth
+                    onCancel={handleClose}
+                    onOk={handleSubmitFeedback}
+                    okText="Gửi đánh giá"
+                    cancelText="Hủy"
                   >
-                    <DialogTitle>Đánh giá</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText>Vui lòng nhập thông tin đánh giá của bạn</DialogContentText>
-                      <TextField
-                        autoFocus
-                        required
-                        margin="dense"
-                        id="feedbackText"
-                        name="feedbackText"
-                        label="Nội dung đánh giá"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={feedbackText}
-                        onChange={(e) => setFeedbackText(e.target.value)}
-                      />
-                      <Button
-                        component="label"
-                        role={undefined}
-                        variant="contained"
-                        tabIndex={-1}
-                        startIcon={<CloudUploadIcon />}
-                      >
-                        Upload files
-                        <VisuallyHiddenInput type="file" multiple onChange={handleFileChange} />
-                      </Button>
-                      <div style={{ marginTop: '16px' }}>
-                        <strong>Ảnh đã tải lên:</strong>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                          {Array.isArray(mediaUrls) &&
-                            mediaUrls.map((url, index) => (
-                              <img
-                                key={index}
-                                src={url.startsWith('blob:') ? url : `${PUBLIC_API_URL}/data/${url}`} // Kiểm tra URL tạm thời hoặc từ server
-                                alt={`Uploaded ${index}`}
-                                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }}
-                              />
-                            ))}
-                        </div>
+                    <p>Vui lòng nhập thông tin đánh giá của bạn</p>
+                    <Input.TextArea
+                      rows={4}
+                      placeholder="Nội dung đánh giá"
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                    />
+                    <p style={{ marginTop: '16px' }}>Tải ảnh lên</p>
+                    <Button
+                      component="label"
+                      role={undefined}
+                      variant="contained"
+                      tabIndex={-1}
+                      style={{ marginTop: '8px' }}
+                      startIcon={<CloudUploadIcon />}
+                    >
+                      Upload files
+                      <VisuallyHiddenInput type="file" multiple onChange={handleFileChange} />
+                    </Button>
+                    <div style={{ marginTop: '16px' }}>
+                      <strong>Ảnh đã tải lên:</strong>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                        {Array.isArray(mediaUrls) &&
+                          mediaUrls.map((url, index) => (
+                            <img
+                              key={index}
+                              src={url.startsWith('blob:') ? url : `${PUBLIC_API_URL}/data/${url}`} // Kiểm tra URL tạm thời hoặc từ server
+                              alt={`Uploaded ${index}`}
+                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }}
+                            />
+                          ))}
                       </div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginTop: '16px',
-                        }}
-                      >
-                        <span style={{ fontSize: '18px', fontWeight: 'bold' }}>Đánh giá:</span>
-                        {[...Array(5)].map((_, index) => (
-                          <FontAwesomeIcon
-                            key={index}
-                            icon={faStar}
-                            className={index < rating ? styles['selected-star'] : styles['regular-star1']}
-                            onClick={() => setRating(index + 1)}
-                          />
-                        ))}
-                      </div>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={handleClose}>Hủy</Button>
-                      <Button type="submit">Gửi đánh giá</Button>
-                    </DialogActions>
-                  </Dialog>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'left',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginTop: '16px',
+                      }}
+                    >
+                      <span style={{ fontSize: '18px', fontWeight: 'bold' }}>Đánh giá:</span>
+                      <Rate value={rating} onChange={(value) => setRating(value)} />
+                    </div>
+                  </Modal>
                 </React.Fragment>
               </div>
             )}

@@ -3,12 +3,10 @@ import styles from './Categorymanagement.module.scss';
 import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleXmark, faMagnifyingGlass, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
-import Dialog from '@mui/material/Dialog';
-import CreatedOrUpdatedCategory from '~/components/Layout/components/CreatedOrUpdatedCategory';
 import axios from 'axios';
-import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { Modal, Form, Input, Select, Button, message } from 'antd';
 
 const cx = classNames.bind(styles);
 const PUBLIC_API_URL = 'http://localhost:8080/api/products';
@@ -16,12 +14,12 @@ const PUBLIC_API_URL = 'http://localhost:8080/api/products';
 function Categorymanagement() {
   const [searchValue, setSearchValue] = useState('');
   const [categories, setCategories] = useState([]);
-  const [btn, setBtn] = useState('Thêm');
-  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { confirm } = Modal;
+  const [form] = Form.useForm(); // Tạo instance của form
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const inputRef = useRef();
 
@@ -64,19 +62,31 @@ function Categorymanagement() {
   };
 
   const handleDeleteCategory = (id) => {
-    axios
-      .delete(`${PUBLIC_API_URL}/deleteCategory/${id}`)
-      .then((res) => {
-        const { success } = res.data;
-        if (success) {
-          message.success('Xóa danh mục thành công!');
-        } else {
-          message.error('Có lỗi xảy ra vui lòng thử lại!');
-        }
-        handleClose();
-        fetchCategories();
-      })
-      .catch((err) => console.log(err));
+    confirm({
+      title: 'Bạn có chắc chắn muốn xóa danh mục này?',
+      content: 'Hành động này không thể hoàn tác.',
+      duration: 5,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk() {
+        axios
+          .delete(`${PUBLIC_API_URL}/deleteCategory/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          })
+          .then(() => {
+            message.success('Xóa danh mục thành công!', 5);
+            fetchCategories(); // Tải lại danh sách danh mục
+          })
+          .catch((err) => {
+            console.error('Error deleting category:', err.response?.data || err.message);
+            message.error('Có lỗi xảy ra, vui lòng thử lại!');
+          });
+      },
+      onCancel() {
+        message.info('Hủy xóa danh mục.', 5);
+      },
+    });
   };
 
   const handleClear = () => {
@@ -91,86 +101,75 @@ function Categorymanagement() {
     }
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    form.resetFields(); // Reset form khi mở modal
   };
 
   const handleEditClick = (category) => {
     setSelectedCategory(category);
     setIsEditing(true);
-    setBtn('Cập nhật');
+    setIsModalOpen(true);
+    form.setFieldsValue({
+      categoryName: category.categoryName,
+      description: category.description,
+      gender: category.gender,
+      is_deleted: category.is_deleted === 0 ? 'Đang bán' : 'Ngừng kinh doanh',
+    });
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
     setIsEditing(false);
+    setSelectedCategory(null);
+    form.resetFields(); // Reset form khi đóng modal
   };
 
-  const handleCreatedOrUpdated = (data) => {
-    console.log(data);
-    setIsSaving(true);
-  
+  const handleSaveCategory = (values) => {
+    const data = {
+      ...values,
+      is_deleted: values.is_deleted === 'Đang bán' ? 0 : 1, // Chuyển trạng thái thành số
+    };
+
     if (isEditing && selectedCategory?.id) {
       // Gọi API cập nhật danh mục
       axios
         .put(`${PUBLIC_API_URL}/updateCategory/${selectedCategory.id}`, data, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-        .then((res) => {
-          const { success } = res.data;
-          if (success) {
-            message.success('Cập nhật danh mục thành công!');
-          } else {
-            message.error('Có lỗi xảy ra, vui lòng thử lại!');
-          }
-          setBtn('Sửa');
-          handleClose();
+        .then(() => {
+          message.success('Cập nhật danh mục thành công!');
           fetchCategories();
+          handleCloseModal();
         })
         .catch((err) => {
           console.error('Error updating category:', err.response?.data || err.message);
           message.error('Không thể cập nhật danh mục. Vui lòng thử lại!');
-        })
-        .finally(() => setIsSaving(false));
+        });
     } else {
       // Gọi API thêm mới danh mục
       axios
         .post(`${PUBLIC_API_URL}/addCategory`, data, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-        .then((res) => {
-          const { success } = res.data;
-          if (success) {
-            message.success('Thêm mới danh mục thành công!');
-          } else {
-            message.error('Có lỗi xảy ra, vui lòng thử lại!');
-          }
-          handleClose();
+        .then(() => {
+          message.success('Thêm mới danh mục thành công!');
           fetchCategories();
+          handleCloseModal();
         })
         .catch((err) => {
           console.error('Error adding category:', err.response?.data || err.message);
           message.error('Không thể thêm danh mục. Vui lòng thử lại!');
-        })
-        .finally(() => setIsSaving(false));
+        });
     }
   };
 
   return (
     <section className={cx('wrapper')}>
       <div className={cx('function-site')}>
-        <button variant="outlined" onClick={handleClickOpen} className={cx('btn-add')}>
+        <Button type="primary" onClick={handleOpenModal} className={cx('btn-add')}>
           Thêm danh mục
-        </button>
-        <Dialog open={open || isEditing} onClose={handleClose} fullWidth maxWidth="sm">
-          <CreatedOrUpdatedCategory
-            handleCreatedOrUpdated={handleCreatedOrUpdated}
-            handleClose={handleClose}
-            selectedCategory={selectedCategory}
-            isEditing={isEditing}
-            btn={btn}
-          />
-        </Dialog>
+        </Button>
         <div className={cx('search-site')}>
           <button className={cx('search-btn')}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
@@ -190,65 +189,31 @@ function Categorymanagement() {
         </div>
       </div>
       <div className={cx('table-site')}>
-        <div className={cx('table')}>
-          <div className={cx('table-grid')}>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>STT</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Tên danh mục</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Mô tả</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Ngày tạo</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Ngày chỉnh sửa</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Giới tính</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Trạng thái</h5>
-            </div>
-            <div className={cx('row-site')}>
-              <h5 className={cx('row-title')}>Hành động</h5>
-            </div>
-          </div>
-          {categories.length > 0 ? (
-            categories
-            .filter(
-              (category) =>
-                category.categoryName.toLowerCase().includes(searchValue.toLowerCase()) ||
-                category.gender.toLowerCase().includes(searchValue.toLowerCase()),
-            )
-            .map((val, index) => {
-              return (
-                <div key={val.id} className={cx('table-grid', 'item-grid')}>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{index + 1}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{val.categoryName}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{val.description}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{formatDate(val.createAt)}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{formatDate(val.updatedAt)}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{val.gender}</p>
-                  </div>
-                  <div className={cx('item-site')}>
-                    <p className={cx('item-content')}>{val.is_deleted == 0 ? 'Đang bán' : 'Ngừng kinh doanh'}</p>
-                  </div>
-                  <div className={cx('item-site')}>
+        <table className={cx('table')}>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên danh mục</th>
+              <th>Mô tả</th>
+              <th>Ngày tạo</th>
+              <th>Ngày chỉnh sửa</th>
+              <th>Giới tính</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.length > 0 ? (
+              categories.map((val, index) => (
+                <tr key={val.id}>
+                  <td>{index + 1}</td>
+                  <td>{val.categoryName}</td>
+                  <td>{val.description}</td>
+                  <td>{formatDate(val.createAt)}</td>
+                  <td>{formatDate(val.updatedAt)}</td>
+                  <td>{val.gender}</td>
+                  <td>{val.is_deleted === 0 ? 'Đang bán' : 'Ngừng kinh doanh'}</td>
+                  <td>
                     <div className={cx('wrapper-icon')}>
                       <FontAwesomeIcon
                         className={cx('icon-action')}
@@ -261,15 +226,67 @@ function Categorymanagement() {
                         onClick={() => handleDeleteCategory(val.id)}
                       />
                     </div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p className={cx('no-data')}>Không có danh mục nào.</p>
-          )}
-        </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className={cx('no-data')}>
+                  Không có danh mục nào.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
+      <Modal
+        title={isEditing ? 'Cập nhật danh mục' : 'Thêm danh mục'}
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={[
+          <Button key="cancel" onClick={handleCloseModal}>
+            Hủy
+          </Button>,
+          <Button key="save" type="primary" onClick={() => form.submit()}>
+            {isEditing ? 'Cập nhật' : 'Thêm'}
+          </Button>,
+        ]}
+      >
+        <Form form={form} layout="vertical" onFinish={handleSaveCategory}>
+          <Form.Item
+            label="Tên danh mục"
+            name="categoryName"
+            rules={[{ required: true, message: 'Vui lòng nhập tên danh mục!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Mô tả" name="description">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item
+            label="Giới tính"
+            name="gender"
+            rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+          >
+            <Select>
+              <Select.Option value="Nam">Nam</Select.Option>
+              <Select.Option value="Nữ">Nữ</Select.Option>
+              <Select.Option value="Khác">Khác</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="Trạng thái"
+            name="is_deleted"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+          >
+            <Select>
+              <Select.Option value="Đang bán">Đang bán</Select.Option>
+              <Select.Option value="Ngừng kinh doanh">Ngừng kinh doanh</Select.Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </section>
   );
 }

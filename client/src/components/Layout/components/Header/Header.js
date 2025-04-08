@@ -1,6 +1,6 @@
 import { faUser, faCartShopping, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import axios from 'axios';
@@ -9,16 +9,16 @@ import 'tippy.js/dist/tippy.css';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import config from '~/config';
 import styles from './Header.module.scss';
-import { message } from 'antd';
+import { message, Menu } from 'antd';
 import logo from '~/assets/images/Unet-removebg-preview.svg';
 import { useCart } from '~/pages/Cart/CartProvider';
+import { useFilter } from '~/components/Layout/components/Header/FilterContext';
 
 const cx = classNames.bind(styles);
 
 const MENU_ITEMS = [
-  { title: 'Profile', to: '/profile' },
-  { title: 'Orders', to: '/orders' },
-  { title: 'Log Out', to: '/login' },
+  { title: 'Thông tin cá nhân', to: '/profile' },
+  { title: 'Đăng xuất', to: '/login' },
 ];
 
 function Header() {
@@ -27,6 +27,61 @@ function Header() {
   const { cart, setCart } = useCart(); // Lưu danh sách sản phẩm trong giỏ hàng
   const [totalPrice, setTotalPrice] = useState(0); // Tổng giá trị giỏ hàng
   const navigate = useNavigate();
+  const [current, setCurrent] = useState('mail');
+
+  const { setCategoryId } = useFilter(); // Lấy hàm cập nhật categoryId từ context
+
+  const handleCategorySelect = (categoryId) => {
+    setCategoryId(categoryId); // Cập nhật categoryId vào context
+  };
+
+  const [groupedCategories, setGroupedCategories] = useState({}); // Lưu danh mục theo gender
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:8080/api/products/getAll', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Gửi token trong header
+          },
+        });
+        const data = response.data;
+
+        // Nhóm danh mục theo gender
+        const grouped = data.reduce((acc, category) => {
+          const gender = category.gender;
+          if (!acc[gender]) {
+            acc[gender] = [];
+          }
+          acc[gender].push(category);
+          return acc;
+        }, {});
+
+        setGroupedCategories(grouped);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const items = [
+    {
+      label: 'Danh mục',
+      key: 'SubMenu',
+      children: Object.keys(groupedCategories).map((gender) => ({
+        type: 'group',
+        label: gender, // Sử dụng `gender` trực tiếp vì nó là chuỗi
+        key: `gender-${gender}`,
+        children: groupedCategories[gender].map((category) => ({
+          label: category.categoryName, // Hiển thị tên danh mục con
+          key: category.id, // Khóa duy nhất cho từng danh mục
+        })),
+      })),
+    },
+  ];
 
   const handleCheckout = () => {
     toggleCart(); // Đóng giỏ hàng
@@ -49,19 +104,17 @@ function Header() {
     try {
       const token = getAuthToken();
       if (!token) {
-        message.warn('Người dùng chưa đăng nhập!');
+        message.warn('Bạn chưa đăng nhập!');
         return;
       }
-  
-      console.log('Token:', token);
-  
+
       const response = await axios.get('http://localhost:8080/api/cart/', {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       setCart(response.data.items || []); // Update cart state
       setTotalPrice(response.data.totalPrice || 0); // Update total price
-  
+
       if (response.data.items.length === 0) {
         console.info('Giỏ hàng của bạn đang trống.');
       }
@@ -111,10 +164,6 @@ function Header() {
     setIsCartOpen(!isCartOpen);
   };
 
-  useEffect(() => {
-    console.log('Giỏ hàng trong Header đã được cập nhật:', cart);
-  }, [cart]);
-
   return (
     <header className={cx('wrapper')}>
       <div className={cx('inner')}>
@@ -131,9 +180,16 @@ function Header() {
           <Link to={config.routes.product} className={cx('pre-desktop-menu-item')}>
             <button className={cx('dropdown-toggle')}>Sản phẩm</button>
           </Link>
-          <Link to={config.routes.productItem} className={cx('pre-desktop-menu-item')}>
-            <button className={cx('dropdown-toggle')}>Danh mục</button>
-          </Link>
+          <Menu
+            className={cx('dropdown-toggle1')}
+            onClick={(e) => {
+              const categoryId = e.key; // Lấy categoryId từ key của menu item
+              handleCategorySelect(categoryId); // Cập nhật categoryId vào context
+            }}
+            selectedKeys={[current]}
+            mode="horizontal"
+            items={items}
+          />
         </ul>
 
         <div className={cx('search-place')}>
@@ -204,13 +260,13 @@ function Header() {
               render={(attrs) => (
                 <div className={cx('content')} tabIndex="-1" {...attrs}>
                   <PopperWrapper>
-                    <h2 className={cx('title-menu')}>Account</h2>
+                    <h2 className={cx('title-menu')}>Tài khoản</h2>
                     {MENU_ITEMS.map((item, index) => (
                       <Link
                         className={cx('menu-items')}
                         key={index}
                         to={item.to}
-                        onClick={item.title === 'Log Out' ? handleLogout : undefined}
+                        onClick={item.title === 'Đăng xuất' ? handleLogout : undefined}
                       >
                         {item.title}
                       </Link>
@@ -225,7 +281,7 @@ function Header() {
             </Tippy>
           ) : (
             <button className={cx('login-btn')}>
-              <Link to={config.routes.login}>Log in</Link>
+              <Link to={config.routes.login}>Đăng nhập</Link>
             </button>
           )}
         </div>

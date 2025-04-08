@@ -7,7 +7,6 @@ import {
   faFileInvoice,
   faFilePdf,
   faList,
-  faWarehouse,
 } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -36,18 +35,6 @@ function SidebarAdmin() {
             </div>
             <span className={cx('nav-title')}>Quản lý tài khoản</span>
           </Link>
-        </li>
-        <li className={cx('nav-items')}>
-          {/* <Link
-            to={config.routes.brandmanagement}
-            className={cx('nav-link', `${activeItem === 'inventory' ? 'active' : ''}`)}
-            onClick={() => handleItemClick('inventory')}
-          >
-            <div className={cx('nav-icon')}>
-              <FontAwesomeIcon icon={faWarehouse} />
-            </div>
-            <span className={cx('nav-title')}>Quản lý thương hiệu</span>
-          </Link> */}
         </li>
         <li className={cx('nav-items')}>
           <Link
@@ -87,18 +74,6 @@ function SidebarAdmin() {
         </li>
         <li className={cx('nav-items')}>
           <Link
-            to={config.routes.vouchermanagement}
-            className={cx('nav-link', `${activeItem === 'voucher' ? 'active' : ''}`)}
-            onClick={() => handleItemClick('voucher')}
-          >
-            <div className={cx('nav-icon')}>
-              <FontAwesomeIcon icon={faFileInvoice} />
-            </div>
-            <span className={cx('nav-title')}>Quản lý voucher</span>
-          </Link>
-        </li>
-        <li className={cx('nav-items')}>
-          <Link
             to={config.routes.report}
             className={cx('nav-link', `${activeItem === 'report' ? 'active' : ''}`)}
             onClick={() => handleItemClick('report')}
@@ -106,7 +81,7 @@ function SidebarAdmin() {
             <div className={cx('nav-icon')}>
               <FontAwesomeIcon icon={faFilePdf} />
             </div>
-            <span className={cx('nav-title')}>Thống kê</span>
+            <span className={cx('nav-title')}>Thống kê doang thu</span>
           </Link>
         </li>
       </ul>
