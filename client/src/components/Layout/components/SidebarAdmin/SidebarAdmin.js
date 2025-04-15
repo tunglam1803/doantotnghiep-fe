@@ -81,7 +81,7 @@ function SidebarAdmin() {
             <div className={cx('nav-icon')}>
               <FontAwesomeIcon icon={faFilePdf} />
             </div>
-            <span className={cx('nav-title')}>Thống kê doang thu</span>
+            <span className={cx('nav-title')}>Thống kê doanh thu</span>
           </Link>
         </li>
       </ul>

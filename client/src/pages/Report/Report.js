@@ -14,7 +14,7 @@ const PUBLIC_API_URL = 'http://localhost:8080';
 
 const Report = () => {
   const [year, setYear] = useState(2024); // Năm mặc định
-  const [month, setMonth] = useState(1); // Tháng mặc định
+  // const [month, setMonth] = useState(1); // Tháng mặc định
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
   const [quarterlyRevenue, setQuarterlyRevenue] = useState([]);
   const [monthlyOrders, setMonthlyOrders] = useState([]);

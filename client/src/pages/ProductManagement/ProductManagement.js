@@ -1,13 +1,11 @@
-import classNames from 'classnames/bind';
-import styles from './ProductManagement.module.scss';
-import { useEffect, useState, useRef } from 'react';
+import { faCircleXmark, faMagnifyingGlass, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencil, faTrash, faMagnifyingGlass, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { Button, Form, Input, message, Modal, Pagination, Select } from 'antd';
 import axios from 'axios';
-import { Pagination } from 'antd';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import classNames from 'classnames/bind';
+import { useEffect, useRef, useState } from 'react';
+import styles from './ProductManagement.module.scss';
 
-import { styled } from '@mui/material/styles';
 
 const PUBLIC_API_URL = 'http://localhost:8080';
 
@@ -77,7 +75,7 @@ function ProductManagement() {
   const handleChange = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchValue(searchValue);
-  
+
     if (!searchValue.trim()) {
       // Nếu không có giá trị tìm kiếm, đặt pageSize về 3
       setPageSize(3);
@@ -85,7 +83,7 @@ function ProductManagement() {
       // Nếu có giá trị tìm kiếm, hiển thị tất cả kết quả
       setPageSize(500);
     }
-  
+
     setCurrentPage(1); // Đặt lại trang hiện tại về 1
   };
 
@@ -501,11 +499,18 @@ function ProductManagement() {
                       placeholder="Chọn màu sắc"
                       style={{ width: '120px' }}
                     >
-                      <Select.Option value="red">Đỏ</Select.Option>
-                      <Select.Option value="blue">Xanh</Select.Option>
-                      <Select.Option value="green">Lục</Select.Option>
                       <Select.Option value="black">Đen</Select.Option>
+                      <Select.Option value="blue">Xanh dương</Select.Option>
+                      <Select.Option value="brown">Nâu</Select.Option>
+                      <Select.Option value="green">Lục</Select.Option>
+                      <Select.Option value="grey">Xám</Select.Option>
+                      <Select.Option value="multi-colour">Nhiều màu</Select.Option>
+                      <Select.Option value="orange">Cam</Select.Option>
+                      <Select.Option value="pink">Hồng</Select.Option>
+                      <Select.Option value="purple">Tím</Select.Option>
+                      <Select.Option value="red">Đỏ</Select.Option>
                       <Select.Option value="white">Trắng</Select.Option>
+                      <Select.Option value="yellow">Vàng</Select.Option>
                     </Select>
                   </Form.Item>
 
