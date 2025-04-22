@@ -434,7 +434,9 @@ function ProductItem() {
                         }}
                         disabled={selectedSize && !availableColors.includes(color)}
                         style={{
-                          backgroundColor: color,
+                          backgroundColor: color === 'multi-colour' ? 'transparent' : color, // Xử lý riêng cho multi-colour
+                          backgroundImage:
+                            color === 'multi-colour' ? 'linear-gradient(45deg, red, yellow, green, blue)' : 'none',
                           width: '40px',
                           height: '40px',
                           borderRadius: '50%',

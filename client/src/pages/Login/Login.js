@@ -120,8 +120,8 @@ function Login() {
               {apiError && <p className={cx('error-message')}>{apiError}</p>}
               <button className={cx('submit')} type="submit">Đăng nhập</button>
               <p className={cx('signup-link')}>
-                Chưa có tài khoản?
-                <Link to={config.routes.register}> Đăng ký</Link>
+                Chưa có tài khoản?{' '}
+                <Link to={config.routes.register}>Đăng ký</Link>
               </p>
               <Link to={config.routes.forgotpass} className={cx('forget-password')}> Quên mật khẩu?</Link>
             </form>
