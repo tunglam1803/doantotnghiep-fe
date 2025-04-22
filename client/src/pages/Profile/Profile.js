@@ -204,7 +204,7 @@ const Profile = () => {
         <div className={cx('profile-sidebar')}>
           <div className={cx('profile-avatar')}>
             <img src="https://pubcdn.ivymoda.com/ivy2//images/v2/assets/user-avatar-placeholder.png" alt="Avatar" />
-            <p>Trịnh Tùng Lâm</p>
+            <p>{user.fullName}</p>
           </div>
           <ul className={cx('profile-menu')}>
             <li className={cx({ active: activeSection === 'profile' })} onClick={() => setActiveSection('profile')}>
@@ -284,6 +284,7 @@ const Profile = () => {
                       <th style={{ width: '110px' }}>Tổng tiền</th>
                       <th>Phí vận chuyển</th>
                       <th>Phương thức vận chuyển</th>
+                      <th>Phương thức thanh toán</th>
                       <th>Trạng thái thanh toán</th>
                       <th>Trạng thái đơn hàng</th>
                     </tr>
@@ -314,6 +315,11 @@ const Profile = () => {
                             : order.shippingMethod === 'EXPRESS'
                             ? 'Giao hàng nhanh'
                             : 'Giao hàng hỏa tốc'}
+                        </td>
+                        <td>
+                          {order.paymentMethod === 'VNPAY'
+                            ? 'Thanh toán qua VNPAY'
+                            : 'Thanh toán khi nhận hàng'}
                         </td>
                         <td>{order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}</td>
                         <td>

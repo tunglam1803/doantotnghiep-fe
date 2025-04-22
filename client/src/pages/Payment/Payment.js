@@ -6,6 +6,8 @@ import { Button, Form, Input, Space, Select } from 'antd';
 import { useCart } from '../Cart/CartProvider';
 import { Link } from 'react-router-dom';
 import config from '~/config';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
 const cx = classNames.bind(styles);
 const BASE_URL = 'http://localhost:8080';
@@ -16,12 +18,28 @@ const Payment = () => {
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState('');
   const [form] = Form.useForm();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [shippingAddress, setShippingAddress] = useState(null); // Lưu thông tin địa chỉ giao hàng
 
   useEffect(() => {
     fetchCart();
-    fetchShippingAddress(); // Gọi hàm lấy địa chỉ giao hàng khi component mount
-  }, []);
+    fetchShippingAddress();
+
+    // Xử lý kết quả thanh toán từ URL
+    const queryParams = new URLSearchParams(location.search);
+    const status = queryParams.get('status'); // Trạng thái thanh toán
+    const messageText = queryParams.get('message'); // Thông báo từ backend
+
+    if (status) {
+      if (status === 'success') {
+        message.success(messageText || 'Thanh toán thành công!');
+        navigate('/profile'); // Điều hướng đến trang hồ sơ hoặc trang khác
+      } else if (status === 'failure') {
+        message.error(messageText || 'Thanh toán thất bại. Vui lòng thử lại!');
+      }
+    }
+  }, [location]);
 
   const getAuthToken = () => {
     return localStorage.getItem('token');
