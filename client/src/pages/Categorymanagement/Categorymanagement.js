@@ -204,7 +204,12 @@ function Categorymanagement() {
           </thead>
           <tbody>
             {categories.length > 0 ? (
-              categories.map((val, index) => (
+              categories
+                .filter(
+                  (val) =>
+                    (val.categoryName?.toLowerCase() || '').includes(searchValue)
+                )
+                .map((val, index) => (
                 <tr key={val.id}>
                   <td>{index + 1}</td>
                   <td>{val.categoryName}</td>

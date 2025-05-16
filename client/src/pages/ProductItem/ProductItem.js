@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './productItem.module.scss';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../Cart/CartProvider';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
@@ -47,6 +47,7 @@ function ProductItem() {
   const { id } = useParams();
   const [open, setOpen] = React.useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
+  const navigate = useNavigate();
   const [feedbackText, setFeedbackText] = useState('');
   const [rating, setRating] = useState(0);
   const [mediaUrls, setMediaUrls] = useState([]); // Khởi tạo mediaUrls là mảng rỗng
@@ -178,6 +179,11 @@ function ProductItem() {
           Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm token nếu cần
         },
       });
+
+      if (!localStorage.getItem('token')) {
+        message.error('Bạn cần đăng nhập để gửi đánh giá!', 2);
+        navigate('/login');
+        return;}
 
       // Cập nhật danh sách feedback sau khi gửi thành công
       setFeedbacks((prev) => [...prev, response.data]);
