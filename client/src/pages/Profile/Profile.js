@@ -275,6 +275,9 @@ const Profile = () => {
           {activeSection === 'orderManagement' && (
             <div className={cx('profile-section')}>
               <h2>THÔNG TIN ĐƠN HÀNG</h2>
+              <p className={cx('profile-note')}>
+                "Nếu có bất cứ thắc mắc gì về đổi trả hàng thì bạn vui lòng liên hệ CSKH: 0123456789."
+              </p>
               {orderHistory.length > 0 ? (
                 <table className={cx('orders-table')}>
                   <thead>

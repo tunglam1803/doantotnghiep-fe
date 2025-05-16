@@ -27,6 +27,18 @@ const Payment = () => {
     fetchShippingAddress();
 
     // Xử lý kết quả thanh toán từ URL
+    // const queryParams = new URLSearchParams(location.search);
+    // const status = queryParams.get('status'); // Trạng thái thanh toán
+    // const messageText = queryParams.get('message'); // Thông báo từ backend
+
+    // if (status) {
+    //   if (status === 'success') {
+    //     message.success(messageText || 'Thanh toán thành công!');
+    //     navigate('/profile'); // Điều hướng đến trang hồ sơ hoặc trang khác
+    //   } else if (status === 'failure') {
+    //     message.error(messageText || 'Thanh toán thất bại. Vui lòng thử lại!');
+    //   }
+    // }
     const queryParams = new URLSearchParams(location.search);
     const status = queryParams.get('status'); // Trạng thái thanh toán
     const messageText = queryParams.get('message'); // Thông báo từ backend
@@ -37,9 +49,10 @@ const Payment = () => {
         navigate('/profile'); // Điều hướng đến trang hồ sơ hoặc trang khác
       } else if (status === 'failure') {
         message.error(messageText || 'Thanh toán thất bại. Vui lòng thử lại!');
+        navigate('/cart'); // Điều hướng đến giỏ hàng nếu thanh toán thất bại
       }
     }
-  }, [location]);
+  }, [location, navigate]);
 
   const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -198,9 +211,7 @@ const Payment = () => {
                   Nhập lại
                 </Button>
                 <Link to={config.routes.shipping}>
-                  <Button htmlType="button">
-                    Chọn địa chỉ giao hàng khác
-                  </Button>
+                  <Button htmlType="button">Chọn địa chỉ giao hàng khác</Button>
                 </Link>
               </Space>
             </Form.Item>
