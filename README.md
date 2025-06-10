@@ -10,6 +10,7 @@ This is the final project of the System Analysis and Design course of the Inform
 
 Insert gif or link to demo
 - Still not have a proper domain
+- http://3.112.219.18:3000/
 
 ## :checkered_flag: Illustrations
 
