@@ -43,7 +43,7 @@ function BrandManagement() {
       .then((res) => {
         const { success } = res.data;
           if (success) {
-            message.success('Xóa thương hiệu thành công!');
+            message.success('Xóa thương hiệu thành công!!');
           } else {
             message.error('Có lỗi xảy ra vui lòng thử lại!');
           }
