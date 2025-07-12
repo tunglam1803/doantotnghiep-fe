@@ -1,5 +1,4 @@
-#Running DB.json
-$ json-server --watch db.json
+#Running [Backend](https://github.com/tunglam1803/doantotnghiep-be)
 
 
 # UnetFashion---Fashion-Store---ReactJS
