@@ -12,6 +12,8 @@ Insert gif or link to demo
 - Still not have a proper domain
 - http://3.112.219.18:3000/
 
+- ![Homepage Screenshot](assets/images/image.png)
+
 ## :checkered_flag: Illustrations
 
 
