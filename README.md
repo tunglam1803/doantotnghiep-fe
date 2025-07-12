@@ -14,7 +14,23 @@ Insert gif or link to demo
 
 - ## :framed_picture: Screenshot
 
-![Homepage Screenshot](src/assets/images/homepage.png)
+![Admin Screenshot](client/src/assets/images/ADMIN.png)
+
+![Homepage Screenshot](client/src/assets/images/image.png)
+
+![Login Screenshot](client/src/assets/images/dn.png)
+
+![Product Screenshot](client/src/assets/images/ttsp.png)
+
+![ProductIn Screenshot](client/src/assets/images/ttctsp.png)
+
+![Cart Screenshot](client/src/assets/images/giohang.png)
+
+![Order Screenshot](client/src/assets/images/dathang.png)
+
+![Chatbot Screenshot](client/src/assets/images/chatbot.png)
+
+![Payment Screenshot](client/src/assets/images/ttvnpay.png)
 
 ## :checkered_flag: Illustrations
 
