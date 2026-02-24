@@ -4,7 +4,7 @@ import axios from 'axios';
 import { duration } from '@mui/material';
 
 const CartContext = createContext();
-const PUBLIC_API_URL = 'http://localhost:8080';
+const PUBLIC_API_URL = 'http://192.168.189.110:8080';
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
@@ -38,7 +38,7 @@ export const CartProvider = ({ children }) => {
     
         console.log('token:', token);
     
-        const response = await fetch('http://localhost:8080/api/cart/addProductToCart', {
+        const response = await fetch('http://192.168.189.110:8080/api/cart/addProductToCart', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

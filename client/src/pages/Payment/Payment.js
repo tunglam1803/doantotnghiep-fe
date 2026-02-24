@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 
 const cx = classNames.bind(styles);
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'http://192.168.189.110:8080';
 
 const Payment = () => {
   const { cart, setCart } = useCart();

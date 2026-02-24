@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './ProductManagement.module.scss';
 
 
-const PUBLIC_API_URL = 'http://localhost:8080';
+const PUBLIC_API_URL = 'http://192.168.189.110:8080';
 
 const cx = classNames.bind(styles);
 

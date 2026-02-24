@@ -47,7 +47,7 @@ function Login() {
     if (!validateForm()) return;
   
     try {
-      const response = await axios.post('http://localhost:8080/api/users/loginUser', {
+      const response = await axios.post('http://192.168.189.110:8080/api/users/loginUser', {
         userName: username,
         passWord: password,
       });
@@ -72,7 +72,7 @@ function Login() {
   //   if (!validateForm()) return;
   
   //   try {
-  //     const response = await axios.post('http://localhost:8080/api/users/loginUser', {
+  //     const response = await axios.post('http://192.168.189.110:8080/api/users/loginUser', {
   //       userName: username,
   //       passWord: password,
   //     });

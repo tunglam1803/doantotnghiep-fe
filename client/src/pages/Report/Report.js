@@ -10,7 +10,7 @@ const cx = classNames.bind(styles);
 // Đăng ký các thành phần của Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const PUBLIC_API_URL = 'http://localhost:8080';
+const PUBLIC_API_URL = 'http://192.168.189.110:8080';
 
 const Report = () => {
   const [year, setYear] = useState(2024); // Năm mặc định
