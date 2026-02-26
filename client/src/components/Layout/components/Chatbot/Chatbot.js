@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import classNames from 'classnames/bind';
-import styles from './Chatbot.module.scss';
-import { Box, IconButton, TextField, Typography, Button } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import CloseIcon from '@mui/icons-material/Close';
 import ChatIcon from '@mui/icons-material/Chat';
+import CloseIcon from '@mui/icons-material/Close';
+import SendIcon from '@mui/icons-material/Send';
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
+import classNames from 'classnames/bind';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'; // Hỗ trợ bảng, danh sách,...
+import styles from './Chatbot.module.scss';
 
 const cx = classNames.bind(styles);
 
@@ -34,7 +34,7 @@ export default function ChatBox() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('http://localhost:4999/', {
+      const response = await fetch('http://192.168.189.100:4999/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: updatedMessages, token }),

@@ -41,7 +41,7 @@ function Header() {
     const fetchCategories = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8080/api/products/getAll', {
+        const response = await axios.get('http://192.168.189.100:8080/api/products/getAll', {
           headers: {
             Authorization: `Bearer ${token}`, // Gửi token trong header
           },
@@ -108,7 +108,7 @@ function Header() {
         return;
       }
 
-      const response = await axios.get('http://localhost:8080/api/cart/', {
+      const response = await axios.get('http://192.168.189.100:8080/api/cart/', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -141,7 +141,7 @@ function Header() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        'http://localhost:8080/api/cart/updateCartItemQuantity',
+        'http://192.168.189.100:8080/api/cart/updateCartItemQuantity',
         { id, quantity: newQuantity },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -214,7 +214,7 @@ function Header() {
                     {cart.map((item) => (
                       <div key={item.id} className={cx('cart-item')}>
                         <img
-                          src={`http://localhost:8080${item.imageUrl}`}
+                          src={`http://192.168.189.100:8080${item.imageUrl}`}
                           alt={item.nameProduct}
                           className={cx('cart-item-image')}
                         />

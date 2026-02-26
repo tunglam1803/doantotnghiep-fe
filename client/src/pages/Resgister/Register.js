@@ -86,7 +86,7 @@ function Register() {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/users/registerUser', formData);
+      const response = await axios.post('http://192.168.189.100:8080/api/users/registerUser', formData);
 
       if (response.status === 200) {
         message.success('Đăng ký thành công!');

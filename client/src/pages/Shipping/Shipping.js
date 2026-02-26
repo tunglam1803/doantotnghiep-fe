@@ -25,7 +25,7 @@
 
 //   const fetchShippingList = async () => {
 //     try {
-//       const response = await axios.get('http://localhost:8080/api/ship/all', {
+//       const response = await axios.get('http://192.168.189.100:8080/api/ship/all', {
 //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 //       });
 
@@ -55,7 +55,7 @@
 //     }
 
 //     try {
-//       const response = await axios.post('http://localhost:8080/api/ship/save', newShipping, {
+//       const response = await axios.post('http://192.168.189.100:8080/api/ship/save', newShipping, {
 //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 //       });
 //       setShippingList([...shippingList, { ...newShipping, id: response.data }]);
@@ -80,7 +80,7 @@
 //     }
 
 //     try {
-//       await axios.put(`http://localhost:8080/api/ship/update/${currentShipping.id}`, currentShipping, {
+//       await axios.put(`http://192.168.189.100:8080/api/ship/update/${currentShipping.id}`, currentShipping, {
 //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 //       });
 //       setShippingList(
@@ -97,7 +97,7 @@
 
 //   const setDefaultShipping = async (id) => {
 //     try {
-//       await axios.put(`http://localhost:8080/api/ship/default/${id}`, null, {
+//       await axios.put(`http://192.168.189.100:8080/api/ship/default/${id}`, null, {
 //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 //       });
 //       message.success('Đã đặt địa chỉ mặc định thành công!');
@@ -125,7 +125,7 @@
 //     }
 
 //     try {
-//       await axios.delete(`http://localhost:8080/api/ship/delete/${id}`, {
+//       await axios.delete(`http://192.168.189.100:8080/api/ship/delete/${id}`, {
 //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 //       });
 //       setShippingList(shippingList.filter((item) => item.id !== id));
@@ -318,7 +318,7 @@ const Shipping = () => {
 
   const fetchShippingList = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/ship/all', {
+      const response = await axios.get('http://192.168.189.100:8080/api/ship/all', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
@@ -346,7 +346,7 @@ const Shipping = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/ship/save', newShipping, {
+      const response = await axios.post('http://192.168.189.100:8080/api/ship/save', newShipping, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setShippingList([...shippingList, { ...newShipping, id: response.data }]);
@@ -371,7 +371,7 @@ const Shipping = () => {
     }
 
     try {
-      await axios.put(`http://localhost:8080/api/ship/update/${currentShipping.id}`, currentShipping, {
+      await axios.put(`http://192.168.189.100:8080/api/ship/update/${currentShipping.id}`, currentShipping, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setShippingList(
@@ -387,7 +387,7 @@ const Shipping = () => {
 
   const setDefaultShipping = async (id) => {
     try {
-      await axios.put(`http://localhost:8080/api/ship/default/${id}`, null, {
+      await axios.put(`http://192.168.189.100:8080/api/ship/default/${id}`, null, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       message.success('Đã đặt địa chỉ mặc định thành công!');
@@ -404,7 +404,7 @@ const Shipping = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:8080/api/ship/delete/${id}`, {
+      await axios.delete(`http://192.168.189.100:8080/api/ship/delete/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setShippingList(shippingList.filter((item) => item.id !== id));

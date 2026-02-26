@@ -22,7 +22,7 @@ const Profile = () => {
   const addNewAddress = async (values) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8080/api/ship/save', values, {
+      await axios.post('http://192.168.189.100:8080/api/ship/save', values, {
         headers: { Authorization: `Bearer ${token}` },
       });
       message.success('Thêm địa chỉ mới thành công!');
@@ -38,7 +38,7 @@ const Profile = () => {
   const fetchAddresses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8080/api/ship/all', {
+      const response = await axios.get('http://192.168.189.100:8080/api/ship/all', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAddresses(response.data);
@@ -52,7 +52,7 @@ const Profile = () => {
   const fetchDefaultAddress = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8080/api/ship/default', {
+      const response = await axios.get('http://192.168.189.100:8080/api/ship/default', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDefaultAddressId(response.data?.id || null);
@@ -66,7 +66,7 @@ const Profile = () => {
   const deleteAddress = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8080/api/ship/delete/${id}`, {
+      await axios.delete(`http://192.168.189.100:8080/api/ship/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       message.success('Xóa địa chỉ thành công!');
@@ -81,7 +81,7 @@ const Profile = () => {
   const setDefaultAddress = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:8080/api/ship/default/${id}`, null, {
+      await axios.put(`http://192.168.189.100:8080/api/ship/default/${id}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       message.success('Đặt địa chỉ mặc định thành công!');
@@ -109,7 +109,7 @@ const Profile = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:8080/api/orders/getOrderHistory/${userId}`, {
+      const response = await axios.get(`http://192.168.189.100:8080/api/orders/getOrderHistory/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrderHistory(response.data);
@@ -129,7 +129,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:8080/api/users/changePassword',
+        'http://192.168.189.100:8080/api/users/changePassword',
         {
           oldPassword: values.oldPassword,
           newPassword: values.newPassword,
@@ -159,7 +159,7 @@ const Profile = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:8080/api/users/profile', {
+        const response = await axios.get('http://192.168.189.100:8080/api/users/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(response.data);
@@ -176,7 +176,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        'http://localhost:8080/api/users/updateProfile',
+        'http://192.168.189.100:8080/api/users/updateProfile',
         { ...values, id: user.id }, // Gửi ID người dùng để xác định
         {
           headers: { Authorization: `Bearer ${token}` },

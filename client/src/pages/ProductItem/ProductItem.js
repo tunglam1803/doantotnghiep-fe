@@ -14,7 +14,7 @@ import { Modal, Input, Rate, message } from 'antd';
 
 const cx = classNames.bind(styles);
 
-const PUBLIC_API_URL = 'http://localhost:8080';
+const PUBLIC_API_URL = 'http://192.168.189.100:8080';
 const MAX_VISIBLE_THUMBNAILS = 4;
 
 const VisuallyHiddenInput = styled('input')({
