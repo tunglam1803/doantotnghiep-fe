@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Input, Form, Button, Select, message } from 'antd';
 
-const PUBLIC_API_URL = 'http://192.168.189.110:8080';
+const PUBLIC_API_URL = 'http://192.168.189.100:8080';
 
 const cx = classNames.bind(styles);
 

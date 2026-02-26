@@ -10,7 +10,7 @@ import { useCart } from './CartProvider';
 import { message } from 'antd';
 
 const cx = classNames.bind(styles);
-const BASE_URL = 'http://192.168.189.110:8080';
+const BASE_URL = 'http://192.168.189.100:8080';
 
 const Cart = () => {
   const {cart, setCart} = useCart();
@@ -25,7 +25,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get('http://192.168.189.110:8080/api/cart/', {
+      const response = await axios.get('http://192.168.189.100:8080/api/cart/', {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
       setCart(response.data.items);
@@ -37,7 +37,7 @@ const Cart = () => {
   const updateQuantity = async (id, quantity) => {
     try {
       await axios.put(
-        'http://192.168.189.110:8080/api/cart/updateCartItemQuantity',
+        'http://192.168.189.100:8080/api/cart/updateCartItemQuantity',
         {
           // userId = 1,
           id: id,
@@ -55,7 +55,7 @@ const Cart = () => {
 
   const removeItem = async (id) => {
     try {
-      await axios.delete(`http://192.168.189.110:8080/api/cart/removeCartItem/${id}`, {
+      await axios.delete(`http://192.168.189.100:8080/api/cart/removeCartItem/${id}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
       });
       fetchCart();

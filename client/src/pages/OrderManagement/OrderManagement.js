@@ -10,7 +10,7 @@ import axios from 'axios';
 const { Option } = Select;
 const cx = classNames.bind(styles);
 
-const PUBLIC_API_URL = 'http://192.168.189.110:8080';
+const PUBLIC_API_URL = 'http://192.168.189.100:8080';
 
 function OrderManagement() {
   const [searchValue, setSearchValue] = useState('');

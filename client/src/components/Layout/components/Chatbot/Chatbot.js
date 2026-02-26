@@ -34,7 +34,7 @@ export default function ChatBox() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('http://192.168.189.110:4999/', {
+      const response = await fetch('http://192.168.189.100:4999/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: updatedMessages, token }),

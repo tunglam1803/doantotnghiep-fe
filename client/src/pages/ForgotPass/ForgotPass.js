@@ -36,7 +36,7 @@ function ForgotPass() {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://192.168.189.110:8080/api/users/forgot-password', { email });
+      const response = await axios.post('http://192.168.189.100:8080/api/users/forgot-password', { email });
       setSuccessMessage(response.data); // Hiển thị thông báo từ API
       setStep(2); // Chuyển sang bước xác minh OTP
     } catch (error) {
@@ -47,7 +47,7 @@ function ForgotPass() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://192.168.189.110:8080/api/users/verify-otp', null, {
+      await axios.post('http://192.168.189.100:8080/api/users/verify-otp', null, {
         params: { email, otp },
       });
       setStep(3); // Chuyển sang bước đặt lại mật khẩu
@@ -59,7 +59,7 @@ function ForgotPass() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://192.168.189.110:8080/api/users/reset-password', null, {
+      await axios.post('http://192.168.189.100:8080/api/users/reset-password', null, {
         params: { email, newPassword },
       });
       alert('Đặt lại mật khẩu thành công!');

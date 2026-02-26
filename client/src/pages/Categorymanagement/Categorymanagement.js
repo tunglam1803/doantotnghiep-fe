@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
 
 const cx = classNames.bind(styles);
-const PUBLIC_API_URL = 'http://192.168.189.110:8080/api/products';
+const PUBLIC_API_URL = 'http://192.168.189.100:8080/api/products';
 
 function Categorymanagement() {
   const [searchValue, setSearchValue] = useState('');

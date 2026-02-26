@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import config from '~/config';
 
 const cx = classNames.bind(styles);
-const BASE_URL = 'http://192.168.189.110:8080';
+const BASE_URL = 'http://192.168.189.100:8080';
 
 const Order = () => {
   const { cart, setCart } = useCart();
